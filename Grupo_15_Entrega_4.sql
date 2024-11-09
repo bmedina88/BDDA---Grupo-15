@@ -9,6 +9,7 @@
 
 
 ------Activar consultas distribuidas
+use Com5600G15
 GO
 EXEC sp_configure 'Show Advanced', 1
 RECONFIGURE
@@ -29,18 +30,18 @@ IF OBJECT_ID('tempdb..#VentasTemp') IS NOT NULL
 
 -- Crear la tabla temporal con todas las columnas como VARCHAR
 CREATE TABLE #VentasTemp (
-    IDFactura VARCHAR(50),
-    TipoFactura VARCHAR(50),
-    Ciudad VARCHAR(50),
-    TipoCliente VARCHAR(50),
-    Genero VARCHAR(50),
-    Producto NVARCHAR(max),
-    PrecioUnitario VARCHAR(50),
-    Cantidad VARCHAR(50),
-    Fecha VARCHAR(50),
-    Hora VARCHAR(50),
-    MedioPago VARCHAR(50),
-    Empleado VARCHAR(50),
+    IDFactura nVARCHAR(max),
+    TipoFactura nVARCHAR(max),
+    Ciudad nVARCHAR(max),
+    TipoCliente nVARCHAR(max),
+    Genero nVARCHAR(max),
+    Producto nVARCHAR(max),
+    PrecioUnitario nVARCHAR(max),
+    Cantidad nVARCHAR(max),
+    Fecha nVARCHAR(max),
+    Hora nVARCHAR(max),
+    MedioPago nVARCHAR(max),
+    Empleado nVARCHAR(max),
     IdentificadorPago NVARCHAR(max)
 );
 
@@ -61,33 +62,12 @@ WITH (
 EXEC sp_executesql @sql;
 
 
-INSERT INTO Venta.MedioPago (descripcion)
-SELECT DISTINCT MedioPago
-FROM #VentasTemp
-WHERE MedioPago NOT IN (SELECT descripcion FROM Venta.MedioPago);
-
-
-
 INSERT INTO Super.TipoCliente (descripcion, genero)
 SELECT DISTINCT vt.TipoCliente, vt.Genero
 FROM #VentasTemp AS vt
 LEFT JOIN Super.TipoCliente AS tc
     ON vt.TipoCliente = tc.descripcion AND vt.Genero = tc.genero
 WHERE tc.descripcion IS NULL;
-
-
-
-INSERT INTO Producto.Producto (idProducto, origen, nombre, precio, categoria)
-SELECT DISTINCT 
-    ROW_NUMBER() OVER (ORDER BY Producto) AS idProducto, 
-    1 AS origen,  -- Ajusta el valor de origen según sea necesario
-    Producto,
-    CAST(PrecioUnitario AS DECIMAL(10,2)),
-    (SELECT idCategoria FROM Producto.Categoria WHERE nombre = 'Categoría')  -- Ajusta la categoría según sea necesario
-FROM #VentasTemp
-WHERE Producto NOT IN (SELECT nombre FROM Producto.Producto);
-
-
 
 INSERT INTO Venta.Venta (
     idFactura,
@@ -120,7 +100,6 @@ go
 
 
 
-exec venta.importar_ventas 'C:\TP_integrador_Archivos\Ventas_registradas.csv'
 
 
 ---------------------
@@ -140,7 +119,8 @@ CREATE OR ALTER PROCEDURE Super.importarSucursal(
 @ruta nvarchar(max))
 AS
 BEGIN
-
+IF OBJECT_ID('tempdb..#SucursalTemp') IS NOT NULL
+    DROP TABLE #SucursalTemp;
 
 	CREATE TABLE #SucursalTemp(
 		ciudadAnterior nvarchar(max),
@@ -157,16 +137,20 @@ BEGIN
 		'SELECT * FROM [Sucursal$]');
 	
 
-	INSERT INTO Super.Sucursal(ciudad, ciudadAnterior, direccion,horario, telefono)
-	SELECT ciudad,ciudadAnterior, direccion, horario, telefono
-	FROM #SucursalTemp;
-	
+INSERT INTO Super.Sucursal (sucursal, ciudad, direccion, horario, telefono)
+SELECT 
+    t.sucursal, 
+    t.ciudad, 
+    t.direccion, 
+    t.horario, 
+    t.telefono
+FROM #SucursalTemp AS t
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Super.Sucursal AS s
+    WHERE s.ciudad = t.ciudad
+	and s.sucursal = t.sucursal
+)
 
 	DROP TABLE IF EXISTS #SucursalTemp;
 END
-
-EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-select * from Super.Sucursal
-
-----probando--
-select 1

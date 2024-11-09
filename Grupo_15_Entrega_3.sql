@@ -5,7 +5,7 @@
 --GRUPO: 15
 --INTEGRANTES:
 --				Medina, Braian Daniel			DNI: 44354115
---				Di Rocco, Sebastian Martin		DNI: 
+--				Di Rocco, Sebastian Martin		DNI: 41292371
 
 USE tempdb;
 GO
@@ -43,8 +43,8 @@ CREATE TABLE Producto.Categoria(
 
 CREATE TABLE Super.Sucursal(
 	idSucursal int IDENTITY(1,1) PRIMARY KEY,
+	sucursal nvarchar(255),
 	ciudad nvarchar(255),
-	ciudadAnterior nvarchar(255),
 	direccion nvarchar(max),
 	horario nvarchar(max),
 	telefono nvarchar(255)
@@ -118,16 +118,16 @@ GO
 
 GO
 CREATE PROCEDURE Super.InsertarSucursal(
-	@Ciudad nvarchar(255),
-	@ciudadAnterior nvarchar(255),
+	@sucursal nvarchar(255),
+	@ciudad nvarchar(255),
 	@direccion nvarchar(max),
 	@horario nvarchar(max),
 	@telefono nvarchar(255)
 	)
 AS
 BEGIN
-	INSERT INTO Super.Sucursal(ciudad, ciudadAnterior, direccion, horario, telefono)
-	VALUES (@Ciudad, @ciudadAnterior, @direccion, @horario, @telefono);
+	INSERT INTO Super.Sucursal(sucursal, ciudad, direccion, horario, telefono)
+	VALUES (@sucursal, @ciudad, @direccion, @horario, @telefono);
 END
 GO
 
@@ -203,7 +203,5 @@ BEGIN
 	VALUES (@idFactura, @tipoFactura, @fecha, @hora, @idPago, @idTipoCliente, @idProducto,@idOrigen, @idMedioPago, @idEmpleado);
 END
 GO
-
-
 
 
