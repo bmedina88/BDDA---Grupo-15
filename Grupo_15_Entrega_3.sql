@@ -83,9 +83,9 @@ BEGIN
 END;
 CREATE TABLE Super.Empleado(
 	idEmpleado int PRIMARY KEY,
-	dni varchar(9),
-	cuil varchar(15),
-	email nvarchar(50),
+	dni varchar(max),
+	cuil varchar(max),
+	email nvarchar(max),
 	cargo varchar(15),
 	turno varchar(15),
 	sucursal int REFERENCES Super.Sucursal(idSucursal)
