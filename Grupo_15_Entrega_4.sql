@@ -5,7 +5,7 @@
 --GRUPO: 15
 --INTEGRANTES:
 --				Medina, Braian Daniel			DNI: 44354115
---				Di Rocco, Sebastian Martin		DNI: 
+--				Di Rocco, Sebastian Martin		DNI: 41292371
 
 use Com5600G15;
 ------Activar consultas distribuidas
@@ -118,10 +118,10 @@ CREATE OR ALTER PROCEDURE Super.importarSucursal(
 @ruta nvarchar(max))
 AS
 BEGIN	
-	IF OBJECT_ID('tempdb..#SucursalTemp') IS NOT NULL
+	IF OBJECT_ID('tempdb..#SucursalTemp') IS NULL
 		CREATE TABLE #SucursalTemp(
-			ciudadAnterior nvarchar(max),
 			ciudad nvarchar(max),
+			sucursal nvarchar(max),
 			direccion nvarchar(max),
 			horario nvarchar(max),
 			telefono nvarchar(max))
@@ -136,14 +136,15 @@ BEGIN
 		'SELECT * FROM [Sucursal$]');
 	
 
-	INSERT INTO Super.Sucursal(ciudad, ciudadAnterior, direccion,horario, telefono)
-	SELECT ciudad,ciudadAnterior, direccion, horario, telefono
+	INSERT INTO Super.Sucursal(ciudad, sucursal, direccion, horario, telefono)
+	SELECT ciudad, sucursal, direccion, horario, telefono
 	FROM #SucursalTemp AS T
-	WHERE T.ciudad NOT IN (SELECT S.ciudad FROM Super.Sucursal AS S);
+	WHERE T.sucursal NOT IN (SELECT S.sucursal FROM Super.Sucursal AS S);
 	
 	DROP TABLE IF EXISTS #SucursalTemp;
 END
 GO
+
 
 
 -- Importación Medios de Pago
