@@ -7,7 +7,7 @@
 --				Medina, Braian Daniel			DNI: 44354115
 --				Di Rocco, Sebastian Martin		DNI: 
 
-
+use Com5600G15;
 ------Activar consultas distribuidas
 GO
 EXEC sp_configure 'Show Advanced', 1
@@ -135,19 +135,17 @@ SELECT * FROM OPENROWSET(
 
 
 -- Importación sucursal
-
 CREATE OR ALTER PROCEDURE Super.importarSucursal(
 @ruta nvarchar(max))
 AS
-BEGIN
-
-
-	CREATE TABLE #SucursalTemp(
-		ciudadAnterior nvarchar(max),
-		ciudad nvarchar(max),
-		direccion nvarchar(max),
-		horario nvarchar(max),
-		telefono nvarchar(max),)
+BEGIN	
+	IF OBJECT_ID('tempdb..#SucursalTemp') IS NOT NULL
+		CREATE TABLE #SucursalTemp(
+			ciudadAnterior nvarchar(max),
+			ciudad nvarchar(max),
+			direccion nvarchar(max),
+			horario nvarchar(max),
+			telefono nvarchar(max))
 	
 
 	INSERT INTO #SucursalTemp
@@ -159,11 +157,60 @@ BEGIN
 
 	INSERT INTO Super.Sucursal(ciudad, ciudadAnterior, direccion,horario, telefono)
 	SELECT ciudad,ciudadAnterior, direccion, horario, telefono
-	FROM #SucursalTemp;
+	FROM #SucursalTemp AS T
+	WHERE T.ciudad NOT IN (SELECT S.ciudad FROM Super.Sucursal AS S);
 	
-
 	DROP TABLE IF EXISTS #SucursalTemp;
 END
+GO
 
-EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-select * from Super.Sucursal
+
+-- Importación Medios de Pago
+CREATE OR ALTER PROCEDURE Venta.ImportarMedioPago(
+@ruta nvarchar(max) )
+AS
+BEGIN
+	IF OBJECT_ID('tempdb..#MedioPagoTemp') IS NOT NULL
+		CREATE TABLE #MedioPagoTemp(
+			descripcion nvarchar(max))
+	
+
+	INSERT INTO #MedioPagoTemp
+		SELECT * FROM OPENROWSET(
+		'Microsoft.ACE.OLEDB.12.0',
+		'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
+		'SELECT [F2] FROM [medios de pago$]');
+	
+
+	INSERT INTO Venta.MedioPago(descripcion)
+	SELECT descripcion
+	FROM #MedioPagoTemp as T
+	WHERE T.descripcion NOT IN (SELECT M.descripcion FROM Venta.MedioPago AS M);
+
+	DROP TABLE IF EXISTS #MedioPagoTemp;
+END
+GO
+
+
+--Importación Empleados
+CREATE OR ALTER PROCEDURE Super.ImportarEmpleados(
+	@RUTA nvarchar(max) )
+AS
+BEGIN
+		IF OBJECT_ID('tempdb..#EmpleadoTemp') IS NOT NULL
+		CREATE TABLE #EmpleadoTemp(
+			legajo nvarchar(max),
+			nombre nvarchar(max),
+			apellido nvarchar(max),
+			dni nvarchar(max),
+			direccion nvarchar(max),
+			emailPersonal nvarchar(max),
+			emailEmpresa nvarchar(max),
+			cuil nvarchar(max),
+			cargo nvarchar(max),
+			sucursal nvarchar(max),
+			turno nvarchar(max))
+
+
+END
+GO
