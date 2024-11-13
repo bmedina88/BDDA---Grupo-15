@@ -9,7 +9,6 @@
 
 use Com5600G15;
 ------Activar consultas distribuidas
-use Com5600G15
 GO
 EXEC sp_configure 'Show Advanced', 1
 RECONFIGURE
@@ -104,7 +103,7 @@ go
 
 ---------------------
 
-
+--PRUEBA DE CONEXION CON EXCEL
 SELECT * FROM OPENROWSET(
 	'Microsoft.ACE.OLEDB.12.0',
 	'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
@@ -152,7 +151,7 @@ CREATE OR ALTER PROCEDURE Venta.ImportarMedioPago(
 @ruta nvarchar(max) )
 AS
 BEGIN
-	IF OBJECT_ID('tempdb..#MedioPagoTemp') IS NOT NULL
+	IF OBJECT_ID('tempdb..#MedioPagoTemp') IS NULL
 		CREATE TABLE #MedioPagoTemp(
 			descripcion nvarchar(max))
 	
@@ -179,7 +178,7 @@ CREATE OR ALTER PROCEDURE Super.ImportarEmpleados(
 	@RUTA nvarchar(max) )
 AS
 BEGIN
-		IF OBJECT_ID('tempdb..#EmpleadoTemp') IS NOT NULL
+		IF OBJECT_ID('tempdb..#EmpleadoTemp') IS NULL
 		CREATE TABLE #EmpleadoTemp(
 			legajo nvarchar(max),
 			nombre nvarchar(max),
@@ -194,6 +193,130 @@ BEGIN
 			turno nvarchar(max))
 
 
+		INSERT INTO #EmpleadoTemp
+			SELECT * FROM OPENROWSET(
+			'Microsoft.ACE.OLEDB.12.0',
+			'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
+			'SELECT * FROM [Empleados$]');
+
+		WITH EmpleadoConFk AS
+		(SELECT T.legajo, T.dni, T.cuil, T.emailPersonal, T.cargo, T.turno, (SELECT S.idSucursal FROM Super.Sucursal AS S WHERE S.sucursal=T.sucursal) AS idSucursal
+		FROM #EmpleadoTemp as T 
+		WHERE T.legajo IS NOT NULL)
+		INSERT INTO Super.Empleado(idEmpleado, dni, cuil, email, cargo, turno, sucursal)
+		SELECT * 
+		FROM EmpleadoConFk as F
+		WHERE F.legajo NOT IN (SELECT E.idEmpleado FROM Super.Empleado AS E);	
+		
+		DROP TABLE IF EXISTS #EmpleadoTemp;
 END
 GO
+
+
+
+--Importación de Categorias
+CREATE OR ALTER PROCEDURE Producto.ImportarCategorias(
+	@RUTA nvarchar(max))
+AS
+BEGIN
+	IF OBJECT_ID('tempdb..#CategoriaTemp') IS NULL
+		CREATE TABLE #CategoriaTemp(
+			categoria nvarchar(max),
+			producto nvarchar(max))
+
+	INSERT INTO #CategoriaTemp
+		SELECT * FROM OPENROWSET(
+		'Microsoft.ACE.OLEDB.12.0',
+		'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
+		'SELECT * FROM [Clasificacion productos$]');	
+
+	INSERT INTO Producto.Categoria (nombre)
+	SELECT DISTINCT T.categoria
+	FROM #CategoriaTemp AS T
+	WHERE T.categoria NOT IN (SELECT C.nombre FROM Producto.Categoria AS C)
+
+
+	DROP TABLE IF EXISTS #CategoriaTemp;
+END
+GO
+
+
+--Importación de Productos Electrónicos 
+CREATE OR ALTER PROCEDURE Producto.ImportarProductosElectronicos(
+	@RUTA nvarchar(max))
+AS
+BEGIN
+	IF (NOT EXISTS (SELECT * FROM Producto.Categoria WHERE nombre='Electrónicos'))
+		INSERT INTO Producto.Categoria (nombre) VALUES ('Electrónicos')
+	
+	IF OBJECT_ID('tempdb..#ProductoElectronicoTemp') IS NULL
+		CREATE TABLE #ProductoElectronicoTemp(
+			producto nvarchar(max),
+			precio nvarchar(max))
+
+	INSERT INTO #ProductoElectronicoTemp
+		SELECT * FROM OPENROWSET(
+		'Microsoft.ACE.OLEDB.12.0',
+		'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Productos\Electronic accessories.xlsx',
+		'SELECT * FROM [Sheet1$]');	
+
+	INSERT INTO Producto.Producto (categoria, nombre, precio)
+	SELECT (SELECT C.idCategoria FROM Producto.Categoria AS C WHERE nombre='Electrónicos'), * 
+	FROM #ProductoElectronicoTemp AS T
+	WHERE T.producto NOT IN (SELECT P.nombre FROM Producto.Producto AS P)
+
+	DROP TABLE IF EXISTS #ProductoElectronicoTemp;
+END
+GO
+
+
+--Importación Productos Importados
+CREATE OR ALTER PROCEDURE Producto.ImportarProductosImportado(
+	@RUTA nvarchar(max))
+AS
+BEGIN
+	IF OBJECT_ID('tempdb..#ProductoImportadoTemp') IS NULL
+		CREATE TABLE #ProductoImportadoTemp(
+			id nvarchar(max),
+			nombre nvarchar(max),
+			proveedor nvarchar(max),
+			categoria nvarchar(max),
+			cantidadPorUnidad nvarchar(max),
+			precioPorUnidad nvarchar(max))
+
+	INSERT INTO #ProductoImportadoTemp
+		SELECT * FROM OPENROWSET(
+		'Microsoft.ACE.OLEDB.12.0',
+		'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Productos\Productos_importados.xlsx',
+		'SELECT * FROM [Listado de Productos$]');	
+
+	--Creación de categorias no registradas 
+
+	INSERT INTO Producto.Categoria (nombre)
+	SELECT DISTINCT T.categoria
+	FROM #ProductoImportadoTemp AS T
+	WHERE T.categoria NOT IN (SELECT C.nombre FROM Producto.Categoria AS C);
+
+	---SS
+
+	WITH ProductoImportadoConFk AS 
+	( 
+		SELECT (SELECT C.idCategoria FROM Producto.Categoria AS C WHERE T.categoria=C.nombre) AS idCategoria, T.nombre, T.precioPorUnidad
+		FROM #ProductoImportadoTemp AS T
+	)
+	INSERT INTO Producto.Producto (categoria, nombre, precio)
+	SELECT *
+	FROM ProductoImportadoConFk AS C
+	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.nombre=C.nombre AND P.categoria=C.idCategoria) 
+	
+
+	DROP TABLE IF EXISTS #ProductoImportadoTemp;
+END
+GO
+
+EXEC Producto.ImportarCategorias'S'
+EXEC Producto.ImportarProductosImportado 'S'
+SELECT * FROM Producto.Categoria
+SeLECT * FROM Producto.producto
+
 

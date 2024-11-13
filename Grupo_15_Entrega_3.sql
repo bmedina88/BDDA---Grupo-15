@@ -86,8 +86,8 @@ CREATE TABLE Super.Empleado(
 	dni varchar(max),
 	cuil varchar(max),
 	email nvarchar(max),
-	cargo varchar(15),
-	turno varchar(15),
+	cargo varchar(30),
+	turno varchar(30),
 	sucursal int REFERENCES Super.Sucursal(idSucursal)
 );
 go
@@ -96,7 +96,7 @@ BEGIN
     DROP TABLE Producto.Producto;
 END;
 CREATE TABLE Producto.Producto(
-	idProducto int primary key,
+	idProducto int IDENTITY(1,1) primary key,
 	categoria int REFERENCES Producto.Categoria(idCategoria),
 	nombre nvarchar(255),
 	precio DECIMAL(10, 2),
