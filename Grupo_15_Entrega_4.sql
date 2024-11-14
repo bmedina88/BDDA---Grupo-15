@@ -5,7 +5,7 @@
 --GRUPO: 15
 --INTEGRANTES:
 --				Medina, Braian Daniel			DNI: 44354115
---				Di Rocco, Sebastian Martin		DNI: 41292371
+--				Di Rocco, Sebastian Martin		DNI: 41292371.
 
 use Com5600G15;
 ------Activar consultas distribuidas
