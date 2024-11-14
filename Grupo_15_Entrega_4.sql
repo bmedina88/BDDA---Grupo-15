@@ -25,6 +25,7 @@ SELECT * FROM OPENROWSET(
 	'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
 	'SELECT * FROM [medios de pago$]'
 )
+GO
 
 
 
@@ -302,50 +303,101 @@ GO
 
 
 --Importación Ventas
-CREATE OR ALTER PROCEDURE Ventas.ImportarVentas(
+CREATE OR ALTER PROCEDURE Venta.ImportarVentas(
 	@RUTA NVARCHAR(MAX))
 AS
 BEGIN
-		DROP TABLE IF EXISTS #VentaTemp
+	DROP TABLE IF EXISTS #VentaTemp
 
-		CREATE TABLE #VentaTemp(
-		idFactura nvarchar(max),
-		tipoFactura nvarchar(max),
-		ciudadSucursal nvarchar(max),
-		tipoCliente nvarchar(max),
-		genero nvarchar(max),
-		producto nvarchar(max),
-		precioUnitario nvarchar(max),
-		cantidad nvarchar(max),
-		fecha nvarchar(max),
-		hora nvarchar(max),
-		medioPago nvarchar(max),
-		empleado nvarchar(max),
-		idPago nvarchar(max))
+	CREATE TABLE #VentaTemp(
+	idFactura nvarchar(max),
+	tipoFactura nvarchar(max),
+	ciudadSucursal nvarchar(max),
+	tipoCliente nvarchar(max),
+	genero nvarchar(max),
+	producto nvarchar(max),
+	precioUnitario nvarchar(max),
+	cantidad nvarchar(max),
+	fecha nvarchar(max),
+	hora nvarchar(max),
+	medioPago nvarchar(max),
+	empleado nvarchar(max),
+	idPago nvarchar(max))
 
 
-		BULK INSERT #VentaTemp
-		FROM 'C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Ventas_registradas.csv'
-		WITH 
-		(	
-			FORMAT = 'CSV',
-			FIRSTROW = 2,
-			FIELDTERMINATOR = ';',
-			ROWTERMINATOR = '0x0a',
-			CODEPAGE = '65001'
-		);
+	BULK INSERT #VentaTemp
+	FROM 'C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Ventas_registradas.csv'
+	WITH 
+	(	
+		FORMAT = 'CSV',
+		FIRSTROW = 2,
+		FIELDTERMINATOR = ';',
+		ROWTERMINATOR = '0x0a',
+		CODEPAGE = '65001'
+	);
 
-		create table #pruebaVenta(
-			producto nvarchar(max))
+--Update para acentos
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Ã¡', 'á')
+	WHERE producto LIKE '%Ã¡%';
 
-		insert into #pruebaVenta(producto)
-		select CONVERT(nvarchar(max), xz.producto) as pc
-		from #VentaTemp as xz
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Ã©', 'é')
+	WHERE producto LIKE '%Ã©%';
 
-		SELECT * FROM #VentaTemp
-		select * from #pruebaVenta
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Ã­', 'í')
+	WHERE producto LIKE '%Ã­%';
+
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Ã³', 'ó')
+	WHERE producto LIKE '%Ã³%';
+
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Ãº', 'ú')
+	WHERE producto LIKE '%Ãº%';
+
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Ã±', 'ñ')
+	WHERE producto LIKE '%Ã±%';
+
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Âº', 'º')
+	WHERE producto LIKE '%Âº%';
+
+	UPDATE #VentaTemp
+	SET producto = REPLACE(producto, 'Â', 'ª')
+	WHERE producto LIKE '%Âª%';
+
+--Import clientes default
+INSERT INTO Super.TipoCliente (descripcion, genero)
+SELECT VT.tipoCliente, VT.genero
+FROM #VentaTemp AS VT
+WHERE NOT EXISTS (SELECT * FROM Super.TipoCliente AS TC WHERE TC.descripcion=VT.tipoCliente AND TC.genero=VT.genero)
+GROUP BY VT.tipoCliente, VT.genero
+
+
+
+--Import Factura
+INSERT INTO Venta.Factura(idfactura,tipoFactura, idpago, fecha, hora, empleado, medioPago, cliente)
+SELECT T.idFactura, T.tipoFactura, T.idPago, T.fecha, T.hora, T.empleado, (SELECT M.idMedioPago FROM Venta.MedioPago AS M WHERE M.descripcion=T.medioPago),
+		(SELECT TC.idTipoCliente FROM Super.TipoCliente AS TC WHERE TC.descripcion=T.tipoCliente AND TC.genero=T.genero)
+FROM #VentaTemp AS T
+WHERE NOT EXISTS (SELECT * FROM Venta.Factura AS F WHERE F.idfactura=T.idFactura)
+GROUP BY T.idFactura,T.tipoFactura, idPago, fecha, hora, empleado, medioPago, tipoCliente, genero
+
+--Import VentaDetalle
+INSERT INTO Venta.VentaDetalle(cantidad, idfactura, producto)
+SELECT T.cantidad, (SELECT F.id FROM Venta.Factura AS F WHERE F.idfactura=T.idFactura),
+		(SELECT P.idProducto FROM Producto.Producto AS P WHERE P.nombre = T.producto AND P.precio = T.precioUnitario)
+FROM #VentaTemp AS T
+
+--NOTA: PENSAR UN UPDATE AL INGRESAR PRODUCTO REPETIDO 
+
 END
 GO
+
+
 
 
 

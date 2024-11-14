@@ -114,7 +114,9 @@ CREATE TABLE Venta.Factura(
 	hora time,
 	idpago nvarchar(50),
 	medioPago int REFERENCES Venta.MedioPago(idMedioPago),
-	empleado int REFERENCES Super.Empleado(idEmpleado)
+	empleado int REFERENCES Super.Empleado(idEmpleado),
+	cliente int REFERENCES Super.TipoCliente,
+	tipoFactura char(2)
 	);
 go
 
