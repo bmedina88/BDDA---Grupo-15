@@ -8,7 +8,7 @@
 --				Di Rocco, Sebastian Martin		DNI: 41292371
 
 use Com5600G15;
-------Activar consultas distribuidas
+--Activar consultas distribuidas
 GO
 EXEC sp_configure 'Show Advanced', 1
 RECONFIGURE
@@ -17,91 +17,7 @@ EXEC sp_configure 'Ad hoc dis', 1
 RECONFIGURE
 GO
 
-------importar excel de ventas--------
 
-create or alter procedure venta.importar_ventas(
-@direccion nvarchar(max))
-as
-begin
--- Eliminar la tabla temporal si ya existe
-IF OBJECT_ID('tempdb..#VentasTemp') IS NOT NULL
-    DROP TABLE #VentasTemp;
-
--- Crear la tabla temporal con todas las columnas como VARCHAR
-CREATE TABLE #VentasTemp (
-    IDFactura nVARCHAR(max),
-    TipoFactura nVARCHAR(max),
-    Ciudad nVARCHAR(max),
-    TipoCliente nVARCHAR(max),
-    Genero nVARCHAR(max),
-    Producto nVARCHAR(max),
-    PrecioUnitario nVARCHAR(max),
-    Cantidad nVARCHAR(max),
-    Fecha nVARCHAR(max),
-    Hora nVARCHAR(max),
-    MedioPago nVARCHAR(max),
-    Empleado nVARCHAR(max),
-    IdentificadorPago NVARCHAR(max)
-);
-
-
--- Importar el archivo CSV
-DECLARE @sql NVARCHAR(MAX);
-
-SET @sql = N'
-BULK INSERT #VentasTemp
-FROM ''' + @direccion + '''
-WITH (
-    FIELDTERMINATOR = '';'',  
-    ROWTERMINATOR = ''\n'',  
-    FIRSTROW = 2,            
-    CODEPAGE = ''65001''
-);';
-
-EXEC sp_executesql @sql;
-
-
-INSERT INTO Super.TipoCliente (descripcion, genero)
-SELECT DISTINCT vt.TipoCliente, vt.Genero
-FROM #VentasTemp AS vt
-LEFT JOIN Super.TipoCliente AS tc
-    ON vt.TipoCliente = tc.descripcion AND vt.Genero = tc.genero
-WHERE tc.descripcion IS NULL;
-
-INSERT INTO Venta.Venta (
-    idFactura,
-    tipoFactura,
-    fecha,
-    hora,
-    idPago,
-    tipoCliente,
-    producto,
-    origen,
-    medioPago,
-    empleado
-)
-SELECT 
-    IDFactura,
-    TipoFactura,
-    TRY_CAST(Fecha AS DATE),
-    TRY_CAST(Hora AS TIME),
-    IdentificadorPago,
-    (SELECT TOP 1 idTipoCliente FROM Super.TipoCliente WHERE descripcion = TipoCliente AND genero = Genero),
-    (SELECT TOP 1 idProducto FROM Producto.Producto WHERE nombre = Producto),
-    1,  -- Define un valor para origen si es constante o ajusta según corresponda
-    (SELECT TOP 1 idMedioPago FROM Venta.MedioPago WHERE descripcion = MedioPago),
-    try_cast(Empleado as int)
-FROM #VentasTemp;
-
-drop table #VentasTemp
-end
-go
-
-
-
-
-
----------------------
 
 --PRUEBA DE CONEXION CON EXCEL
 SELECT * FROM OPENROWSET(
@@ -143,7 +59,6 @@ BEGIN
 	DROP TABLE IF EXISTS #SucursalTemp;
 END
 GO
-
 
 
 -- Importación Medios de Pago
@@ -213,12 +128,12 @@ END
 GO
 
 
-
 --Importación de Categorias
 CREATE OR ALTER PROCEDURE Producto.ImportarCategorias(
 	@RUTA nvarchar(max))
 AS
 BEGIN
+	DROP TABLE IF EXISTS #CategoriaTemp;
 	IF OBJECT_ID('tempdb..#CategoriaTemp') IS NULL
 		CREATE TABLE #CategoriaTemp(
 			categoria nvarchar(max),
@@ -239,7 +154,6 @@ BEGIN
 	DROP TABLE IF EXISTS #CategoriaTemp;
 END
 GO
-
 
 --Importación de Productos Electrónicos 
 CREATE OR ALTER PROCEDURE Producto.ImportarProductosElectronicos(
@@ -314,9 +228,124 @@ BEGIN
 END
 GO
 
-EXEC Producto.ImportarCategorias'S'
-EXEC Producto.ImportarProductosImportado 'S'
-SELECT * FROM Producto.Categoria
-SeLECT * FROM Producto.producto
+
+--Importación Productos Catalogo
+CREATE OR ALTER PROCEDURE Producto.ImportarProductosCatalogo(
+	@RUTACATALAGO nvarchar(max),
+	@RUTACATEGORIAS nvarchar(max))
+AS
+BEGIN
+	DROP TABLE IF EXISTS #CategoriaTemp;
+	--Precarga de Categorias y su detalle para su posterior busqueda
+	IF OBJECT_ID('tempdb..#CategoriaTemp') IS NULL
+		CREATE TABLE #CategoriaTemp(
+			categoria nvarchar(max),
+			producto nvarchar(max))
+
+	INSERT INTO #CategoriaTemp (categoria, producto)
+		SELECT *
+		FROM OPENROWSET(
+		'Microsoft.ACE.OLEDB.12.0',
+		'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
+		'SELECT * FROM [Clasificacion productos$]');
+
+
+	--Importación catalago
+	DROP TABLE IF EXISTS #CatalogoTemp;
+	IF OBJECT_ID('tempdb..#CatalogoTemp') IS NULL
+		CREATE TABLE #CatalogoTemp(
+			id nvarchar(max),
+			categoria nvarchar(max),
+			nombre nvarchar(max),
+			precio nvarchar(max),
+			precio_referencia nvarchar(max),
+			unidad_referencia nvarchar(max),
+			fecha nvarchar(max))
+
+	BULK INSERT #CatalogoTemp
+	FROM 'C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Productos\catalogo.csv'
+	WITH 
+	(	
+		FORMAT = 'CSV',
+		FIRSTROW = 2,
+		FIELDTERMINATOR = ',',
+		ROWTERMINATOR = '0x0a',
+		CODEPAGE = '65001'
+	);
+
+
+	WITH CategoriaConFk AS
+	(
+		SELECT CTC.*, CC.idCategoria
+		FROM Producto.Categoria AS CC 
+		RIGHT JOIN #CategoriaTemp AS CTC ON CC.nombre=CTC.categoria
+	), 
+	CatalogoConFk AS
+	(
+		SELECT  (SELECT CCFK.idCategoria
+				FROM CategoriaConFk AS CCFK
+				WHERE CCFK.producto=T.categoria) AS idCategoria,  T.nombre, T.precio
+		FROM #CatalogoTemp AS T
+	)
+	INSERT INTO Producto.Producto (categoria, nombre, precio)
+	SELECT *
+	FROM CatalogoConFk AS CACFK
+	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.categoria=CACFK.idCategoria AND P.nombre=CACFK.nombre)
+
+
+
+
+		DROP TABLE IF EXISTS #CategoriaTemp;
+		DROP TABLE IF EXISTS #CatalogoTemp;
+END
+GO
+
+
+--Importación Ventas
+CREATE OR ALTER PROCEDURE Ventas.ImportarVentas(
+	@RUTA NVARCHAR(MAX))
+AS
+BEGIN
+		DROP TABLE IF EXISTS #VentaTemp
+
+		CREATE TABLE #VentaTemp(
+		idFactura nvarchar(max),
+		tipoFactura nvarchar(max),
+		ciudadSucursal nvarchar(max),
+		tipoCliente nvarchar(max),
+		genero nvarchar(max),
+		producto nvarchar(max),
+		precioUnitario nvarchar(max),
+		cantidad nvarchar(max),
+		fecha nvarchar(max),
+		hora nvarchar(max),
+		medioPago nvarchar(max),
+		empleado nvarchar(max),
+		idPago nvarchar(max))
+
+
+		BULK INSERT #VentaTemp
+		FROM 'C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Ventas_registradas.csv'
+		WITH 
+		(	
+			FORMAT = 'CSV',
+			FIRSTROW = 2,
+			FIELDTERMINATOR = ';',
+			ROWTERMINATOR = '0x0a',
+			CODEPAGE = '65001'
+		);
+
+		create table #pruebaVenta(
+			producto nvarchar(max))
+
+		insert into #pruebaVenta(producto)
+		select CONVERT(nvarchar(max), xz.producto) as pc
+		from #VentaTemp as xz
+
+		SELECT * FROM #VentaTemp
+		select * from #pruebaVenta
+END
+GO
+
 
 
