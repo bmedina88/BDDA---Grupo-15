@@ -153,7 +153,8 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La sucursal ya existe.';
+        RAISERROR('Error: La Sucursal ya existe.', 16, 1);
+
     END
 END;
 GO
@@ -175,7 +176,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El medio de pago ya existe.';
+        RAISERROR('Error: el medio de pago ya existe.', 16, 1);
     END
 END;
 GO
@@ -199,7 +200,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El tipo de cliente ya existe.';
+        RAISERROR('Error: el tipo de cliente ya existe.', 16, 1);
     END
 END;
 GO
@@ -223,7 +224,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La categoría ya existe.';
+        RAISERROR('Error: La categoria ya existe.', 16, 1);
     END
 END;
 GO
@@ -252,7 +253,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El empleado ya existe.';
+        RAISERROR('Error: El empleado ya existe.', 16, 1);
     END
 END;
 GO
@@ -278,7 +279,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El producto ya existe.';
+        RAISERROR('Error: El producto ya existe.', 16, 1);
     END
 END;
 GO
@@ -306,7 +307,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La factura ya existe.';
+        RAISERROR('Error: La factura ya existe.', 16, 1);
     END
 END;
 GO
@@ -331,7 +332,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El detalle de venta ya existe.';
+        RAISERROR('Error: el detalle de venta ya existe.', 16, 1);
     END
 END;
 GO
@@ -364,7 +365,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La sucursal no existe.';
+        RAISERROR('Error: La Sucursal no existe.', 16, 1);
     END
 END;
 
@@ -389,7 +390,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El medio de pago no existe.';
+        RAISERROR('Error: el medio de pago no existe.', 16, 1);
     END
 END;
 go
@@ -417,7 +418,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El empleado no existe.';
+        RAISERROR('Error: el empleado no existe.', 16, 1);
     END
 END;
 go
@@ -443,7 +444,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El producto no existe.';
+        RAISERROR('Error: el producto no existe.', 16, 1);
     END
 END;
 go
@@ -473,7 +474,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La factura no existe.';
+        RAISERROR('Error: La factura no existe.', 16, 1);
     END
 END;
 go
@@ -497,7 +498,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El tipo de cliente no existe.';
+        RAISERROR('Error: El tipo de cliente no existe.', 16, 1);
     END
 END;
 go
@@ -519,7 +520,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La categoría no existe.';
+        RAISERROR('Error: La categoria no existe.', 16, 1);
     END
 END;
 go
@@ -545,7 +546,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El detalle de venta no existe.';
+       RAISERROR('Error: el detalle de venta no existe.', 16, 1);;
     END
 END;
 go
@@ -567,7 +568,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La sucursal no existe.';
+        RAISERROR('Error: La Sucursal no existe.', 16, 1);
     END
 END;
 go
@@ -587,7 +588,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El medio de pago no existe.';
+        RAISERROR('Error: el medio de pago no existe.', 16, 1);
     END
 END;
 go
@@ -610,7 +611,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El empleado no existe.';
+        RAISERROR('Error: El empleado no existe.', 16, 1);
     END
 END;
 GO
@@ -631,7 +632,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El producto no existe.';
+        RAISERROR('Error: El producto no existe.', 16, 1);
     END
 END;
 go
@@ -651,7 +652,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La factura no existe.';
+        RAISERROR('Error: La Factura no existe.', 16, 1);
     END
 END;
 go
@@ -671,7 +672,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El detalle de venta no existe.';
+        RAISERROR('Error: El detalle de venta no existe.', 16, 1);
     END
 END;
 go
@@ -691,7 +692,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El tipo de cliente no existe.';
+        RAISERROR('Error: El tipo de cliente no existe.', 16, 1);
     END
 END;
 go
@@ -711,7 +712,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La categoría no existe.';
+        RAISERROR('Error: La categoria no existe.', 16, 1);
     END
 END;
 go
