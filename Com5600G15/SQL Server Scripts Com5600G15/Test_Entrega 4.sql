@@ -11,9 +11,9 @@ use Com5600G15;
 GO
 
 --Ruta raiz de la carpeta del proyecto de GIT
-DECLARE @rutaIncompleta nvarchar(max);
-DECLARE @rutafinal nvarchar (max);
-DECLARE @rutaFinal2 nvarchar(max);
+DECLARE @rutaIncompleta varchar(max);
+DECLARE @rutafinal varchar (max);
+DECLARE @rutaFinal2 varchar(max);
 SELECT @rutaIncompleta='C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15'
 SELECT @rutafinal2=@rutafinal;
 
@@ -205,33 +205,33 @@ EXEC sp_MSforeachtable "ALTER TABLE ? CHECK CONSTRAINT ALL";
 
 
 --Importar todos los datos
---DECLARE @rutaIncompleta nvarchar(max);
---DECLARE @rutafinal nvarchar (max);
---DECLARE @rutaFinal2 nvarchar(max);
---SELECT @rutaIncompleta='C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15'
---SELECT @rutafinal2=@rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
---EXEC Super.importarSucursal @rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
---EXEC Venta.ImportarMedioPago @rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
---EXEC Super.ImportarEmpleados @rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
---EXEC Producto.ImportarCategorias @rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
---EXEC Producto.ImportarProductosElectronicos @rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
---EXEC Producto.ImportarProductosImportado @rutafinal;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\catalogo.csv'
---SELECT @rutafinal2 = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
---EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
---GO
---SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Ventas_registradas.csv'
---EXEC Venta.ImportarVentas @rutafinal;
+DECLARE @rutaIncompleta varchar(max);
+DECLARE @rutafinal varchar (max);
+DECLARE @rutaFinal2 varchar(max);
+SELECT @rutaIncompleta='C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15'
+SELECT @rutafinal2=@rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Super.importarSucursal @rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Venta.ImportarMedioPago @rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Super.ImportarEmpleados @rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Producto.ImportarCategorias @rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
+EXEC Producto.ImportarProductosElectronicos @rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
+EXEC Producto.ImportarProductosImportado @rutafinal;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\catalogo.csv'
+SELECT @rutafinal2 = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
+
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Ventas_registradas.csv'
+EXEC Venta.ImportarVentas @rutafinal;

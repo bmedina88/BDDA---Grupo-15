@@ -60,8 +60,7 @@ BEGIN
 END;
 CREATE TABLE Venta.NotaCredito (
     idNotaCredito INT IDENTITY(1,1) PRIMARY KEY,
-    idFactura INT NOT NULL REFERENCES Venta.Factura(id),
-    idProducto INT NULL REFERENCES Producto.Producto(idProducto),
+    idVentaDetalle INT NOT NULL REFERENCES Venta.VentaDetalle(idVenta),
     valorCredito DECIMAL(10, 2) NOT NULL,
     fechaCreacion DATETIME DEFAULT GETDATE()
 );
@@ -110,16 +109,15 @@ go
 
 
 CREATE OR ALTER PROCEDURE GenerarNotaCredito
-    @idFactura INT,
-    @idProducto INT ,
+    @idVentaDetalle INT,
     @valorCredito DECIMAL(10, 2)
 AS
 BEGIN
     -- Verificar que la factura esté pagada
     IF NOT EXISTS (
         SELECT 1
-        FROM Venta.Factura
-        WHERE id = @idFactura
+        FROM Venta.VentaDetalle
+        WHERE id = @idVentaDetalle
     )
     BEGIN
         PRINT 'Error: La factura no está pagada.';
@@ -128,8 +126,8 @@ BEGIN
 
 
     -- Insertar la nota de crédito
-    INSERT INTO Venta.NotaCredito (idFactura, idProducto, valorCredito)
-    VALUES (@idFactura, @idProducto, @valorCredito);
+    INSERT INTO Venta.NotaCredito (idVentaDetalle, valorCredito)
+    VALUES (@idVentaDetalle, @valorCredito);
 
 
 

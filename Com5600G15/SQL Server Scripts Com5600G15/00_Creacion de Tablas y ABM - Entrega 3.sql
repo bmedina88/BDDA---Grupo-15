@@ -40,11 +40,11 @@ END;
 
 CREATE TABLE Super.Sucursal(
 	idSucursal int IDENTITY(1,1) PRIMARY KEY,
-	sucursal nvarchar(255),
-	ciudad nvarchar(255),
-	direccion nvarchar(max),
-	horario nvarchar(max),
-	telefono nvarchar(255)
+	sucursal varchar(30),
+	ciudad varchar(30),
+	direccion varchar(200),
+	horario varchar(100),
+	telefono varchar(20)
 );
 go
 
@@ -54,7 +54,7 @@ BEGIN
 END;
 CREATE TABLE Venta.MedioPago(
 	idMedioPago int IDENTITY(1,1) PRIMARY KEY,
-	descripcion nvarchar(255)
+	descripcion varchar(50)
 );
 go
 
@@ -64,8 +64,8 @@ BEGIN
 END;
 CREATE TABLE Super.TipoCliente(
 	idTipoCliente int IDENTITY(1,1) PRIMARY KEY,
-	descripcion nvarchar(255),
-	genero nvarchar(50)
+	descripcion varchar(50),
+	genero varchar(50)
 );
 go
 IF OBJECT_ID(N'Producto.Categoria', N'U') IS NOT NULL
@@ -74,7 +74,7 @@ BEGIN
 END;
 CREATE TABLE Producto.Categoria(
 	idCategoria int IDENTITY(1,1) PRIMARY KEY,
-	nombre nvarchar(255)
+	nombre varchar(100)
 );
 go
 IF OBJECT_ID(N'Super.Empleado', N'U') IS NOT NULL
@@ -85,7 +85,7 @@ CREATE TABLE Super.Empleado(
 	idEmpleado int PRIMARY KEY,
 	dni varchar(max),
 	cuil varchar(max),
-	email nvarchar(max),
+	email varchar(max),
 	cargo varchar(30),
 	turno varchar(30),
 	sucursal int REFERENCES Super.Sucursal(idSucursal)
@@ -98,8 +98,8 @@ END;
 CREATE TABLE Producto.Producto(
 	idProducto int IDENTITY(1,1) primary key,
 	categoria int REFERENCES Producto.Categoria(idCategoria),
-	nombre nvarchar(255),
-	precio DECIMAL(10, 2),
+	nombre varchar(150),
+	precio DECIMAL(10, 2)
 
 );
 go
@@ -112,7 +112,7 @@ CREATE TABLE Venta.Factura(
 	idfactura varchar(11),
 	fecha date,
 	hora time,
-	idpago nvarchar(50),
+	idpago varchar(50),
 	medioPago int REFERENCES Venta.MedioPago(idMedioPago),
 	empleado int REFERENCES Super.Empleado(idEmpleado),
 	cliente int REFERENCES Super.TipoCliente,
@@ -129,6 +129,7 @@ CREATE TABLE Venta.VentaDetalle(
 	producto int,
 	idfactura int REFERENCES Venta.Factura(id),
 	cantidad int,
+	precioUnitario DECIMAL(10, 2)
 );
 go
 --STORE PROCEDURE INSERCIÓN DATOS
