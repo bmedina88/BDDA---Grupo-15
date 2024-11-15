@@ -10,6 +10,15 @@
 use Com5600G15;
 GO
 
+--Ruta raiz de la carpeta del proyecto de GIT
+DECLARE @rutaIncompleta nvarchar(max);
+DECLARE @rutafinal nvarchar (max);
+DECLARE @rutaFinal2 nvarchar(max);
+SELECT @rutaIncompleta='C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15'
+SELECT @rutafinal2=@rutafinal;
+
+
+
 --Ignorar Restricción FK 
 EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT ALL";
 --USAR PARA VOLVER A ACTIVAR RESTRICCIÓN DE FK SI SE EJECUTA INDIVIDUALMENTE:
@@ -21,15 +30,18 @@ EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT ALL";
 BEGIN TRANSACTION
 DELETE FROM Super.Sucursal;
 
-EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Super.importarSucursal @rutafinal;
 
 ROLLBACK
 --Test Importar Sucursal - Registros Repetidos
 BEGIN TRANSACTION
 DELETE FROM Super.Sucursal;
 
-EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+
+EXEC Super.importarSucursal @rutafinal;
+EXEC Super.importarSucursal @rutafinal;
 
 ROLLBACK
 
@@ -40,7 +52,8 @@ ROLLBACK
 BEGIN TRANSACTION
 DELETE FROM Venta.MedioPago;
 
-EXEC Venta.ImportarMedioPago 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Venta.ImportarMedioPago @rutafinal;
 
 ROLLBACK
 select * from Venta.MedioPago
@@ -48,8 +61,9 @@ select * from Venta.MedioPago
 BEGIN TRANSACTION
 DELETE FROM Venta.MedioPago;
 
-EXEC Venta.ImportarMedioPago 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-EXEC Venta.ImportarMedioPago 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Venta.ImportarMedioPago @rutafinal;
+EXEC Venta.ImportarMedioPago @rutafinal;
 
 ROLLBACK
 
@@ -60,15 +74,17 @@ ROLLBACK
 BEGIN TRANSACTION
 DELETE FROM Super.Empleado;
 
-EXEC Super.ImportarEmpleados 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Super.ImportarEmpleados @rutafinal;
 
 ROLLBACK
 --Test Importar Empleado - Registros Repetidos
 BEGIN TRANSACTION
 DELETE FROM Super.Empleado;
 
-EXEC Super.ImportarEmpleados 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-EXEC Super.ImportarEmpleados 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Super.ImportarEmpleados @rutafinal;
+EXEC Super.ImportarEmpleados @rutafinal;
 
 ROLLBACK
 
@@ -79,14 +95,17 @@ ROLLBACK
 BEGIN TRANSACTION
 DELETE FROM Producto.Categoria
 
-EXEC Producto.ImportarCategorias 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Producto.ImportarCategorias @rutafinal;
+
 ROLLBACK
 --Test Importar Categoria - Registros Repetidos
 BEGIN TRANSACTION
 DELETE FROM Producto.Categoria
 
-EXEC Producto.ImportarCategorias 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-EXEC Producto.ImportarCategorias 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Producto.ImportarCategorias @rutafinal;
+EXEC Producto.ImportarCategorias @rutafinal;
 
 ROLLBACK
 
@@ -97,15 +116,18 @@ ROLLBACK
 BEGIN TRANSACTION
 DELETE FROM Producto.Producto
 
-EXEC Producto.ImportarProductosElectronicos 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Electronic accessories.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
+EXEC Producto.ImportarProductosElectronicos @rutafinal;
 
 ROLLBACK
 --Test Importar Producto Electronico - Registros Repetidos
 BEGIN TRANSACTION
 DELETE FROM Producto.Producto
 
-EXEC Producto.ImportarProductosElectronicos 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Electronic accessories.xlsx';
-EXEC Producto.ImportarProductosElectronicos 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Electronic accessories.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
+EXEC Producto.ImportarProductosElectronicos @rutafinal;
+EXEC Producto.ImportarProductosElectronicos @rutafinal;
+
 
 ROLLBACK
 
@@ -116,15 +138,17 @@ ROLLBACK
 BEGIN TRANSACTION
 DELETE FROM Producto.Producto
 
-EXEC Producto.ImportarProductosImportado 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Productos_importados.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
+EXEC Producto.ImportarProductosImportado @rutafinal;
 
 ROLLBACK
 --Test Importar Producto Importado - Registros Repetidos
 BEGIN TRANSACTION
 DELETE FROM Producto.Producto
 
-EXEC Producto.ImportarProductosImportado 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Productos_importados.xlsx';
-EXEC Producto.ImportarProductosImportado 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Productos_importados.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
+EXEC Producto.ImportarProductosImportado @rutafinal;
+EXEC Producto.ImportarProductosImportado @rutafinal;
 
 ROLLBACK
 
@@ -135,15 +159,19 @@ ROLLBACK
 BEGIN TRANSACTION
 DELETE FROM Producto.Producto
 
-EXEC Producto.ImportarProductosCatalogo 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\catalogo.csv', 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\catalogo.csv'
+SELECT @rutafinal2 = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
 
 ROLLBACK
 --Test Importar Producto Catalogo - Registros Repetidos
 BEGIN TRANSACTION
 DELETE FROM Producto.Producto
 
-EXEC Producto.ImportarProductosCatalogo 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\catalogo.csv', 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-EXEC Producto.ImportarProductosCatalogo 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\catalogo.csv', 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\catalogo.csv'
+SELECT @rutafinal2 = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
+EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
 
 ROLLBACK
 
@@ -155,7 +183,8 @@ BEGIN TRANSACTION
 DELETE FROM Venta.VentaDetalle;
 DELETE FROM Venta.Factura;
 
-EXEC Venta.ImportarVentas 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Ventas_registradas.csv';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Ventas_registradas.csv'
+EXEC Venta.ImportarVentas @rutafinal;
 
 ROLLBACK
 --Test Importar Venta - Registros Repetidos
@@ -163,8 +192,10 @@ BEGIN TRANSACTION
 DELETE FROM Venta.VentaDetalle;
 DELETE FROM Venta.Factura;
 
-EXEC Venta.ImportarVentas 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Ventas_registradas.csv';
-EXEC Venta.ImportarVentas 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Ventas_registradas.csv';
+SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Ventas_registradas.csv'
+EXEC Venta.ImportarVentas @rutafinal;
+EXEC Venta.ImportarVentas @rutafinal;
+
 
 ROLLBACK
 
@@ -174,20 +205,33 @@ EXEC sp_MSforeachtable "ALTER TABLE ? CHECK CONSTRAINT ALL";
 
 
 --Importar todos los datos
-GO
-EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-GO
-EXEC Venta.ImportarMedioPago 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-GO
-EXEC Super.ImportarEmpleados 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-GO
-EXEC Producto.ImportarCategorias 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-GO
-EXEC Producto.ImportarProductosElectronicos 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Electronic accessories.xlsx';
-GO
-EXEC Producto.ImportarProductosImportado 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Productos_importados.xlsx';
-GO
-EXEC Producto.ImportarProductosCatalogo 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\catalogo.csv', 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
-GO
-EXEC Venta.ImportarVentas 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Ventas_registradas.csv';
-GO
+--DECLARE @rutaIncompleta nvarchar(max);
+--DECLARE @rutafinal nvarchar (max);
+--DECLARE @rutaFinal2 nvarchar(max);
+--SELECT @rutaIncompleta='C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15'
+--SELECT @rutafinal2=@rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+--EXEC Super.importarSucursal @rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+--EXEC Venta.ImportarMedioPago @rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+--EXEC Super.ImportarEmpleados @rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+--EXEC Producto.ImportarCategorias @rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
+--EXEC Producto.ImportarProductosElectronicos @rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
+--EXEC Producto.ImportarProductosImportado @rutafinal;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\catalogo.csv'
+--SELECT @rutafinal2 = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
+--EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
+--GO
+--SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Ventas_registradas.csv'
+--EXEC Venta.ImportarVentas @rutafinal;
