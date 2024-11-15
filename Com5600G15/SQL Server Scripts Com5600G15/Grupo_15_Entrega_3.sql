@@ -40,11 +40,11 @@ END;
 
 CREATE TABLE Super.Sucursal(
 	idSucursal int IDENTITY(1,1) PRIMARY KEY,
-	sucursal nvarchar(255),
-	ciudad nvarchar(255),
-	direccion nvarchar(max),
-	horario nvarchar(max),
-	telefono nvarchar(255)
+	sucursal varchar(30),
+	ciudad varchar(30),
+	direccion varchar(30),
+	horario varchar(10),
+	telefono varchar(20)
 );
 go
 
@@ -54,7 +54,7 @@ BEGIN
 END;
 CREATE TABLE Venta.MedioPago(
 	idMedioPago int IDENTITY(1,1) PRIMARY KEY,
-	descripcion nvarchar(255)
+	descripcion varchar(50)
 );
 go
 
@@ -64,8 +64,8 @@ BEGIN
 END;
 CREATE TABLE Super.TipoCliente(
 	idTipoCliente int IDENTITY(1,1) PRIMARY KEY,
-	descripcion nvarchar(255),
-	genero nvarchar(50)
+	descripcion varchar(50),
+	genero varchar(50)
 );
 go
 IF OBJECT_ID(N'Producto.Categoria', N'U') IS NOT NULL
@@ -98,7 +98,7 @@ END;
 CREATE TABLE Producto.Producto(
 	idProducto int IDENTITY(1,1) primary key,
 	categoria int REFERENCES Producto.Categoria(idCategoria),
-	nombre nvarchar(255),
+	nombre varchar(50),
 	precio DECIMAL(10, 2),
 
 );
@@ -112,7 +112,7 @@ CREATE TABLE Venta.Factura(
 	idfactura varchar(11),
 	fecha date,
 	hora time,
-	idpago nvarchar(50),
+	idpago varchar(50),
 	medioPago int REFERENCES Venta.MedioPago(idMedioPago),
 	empleado int REFERENCES Super.Empleado(idEmpleado),
 	cliente int REFERENCES Super.TipoCliente,
@@ -134,11 +134,11 @@ go
 --STORE PROCEDURE INSERCIÓN DATOS
 
 CREATE OR ALTER PROCEDURE Super.InsertarSucursal
-    @sucursal NVARCHAR(255),
-    @ciudad NVARCHAR(255),
-    @direccion NVARCHAR(MAX),
-    @horario NVARCHAR(MAX),
-    @telefono NVARCHAR(255)
+    @sucursal varchar(30),
+    @ciudad varchar(30),
+    @direccion varchar(30),
+    @horario varchar(10),
+    @telefono varchar(20)
 AS
 BEGIN
     -- Verificar si ya existe la sucursal
@@ -184,7 +184,7 @@ GO
 
 
 CREATE OR ALTER PROCEDURE Super.InsertarTipoCliente
-    @descripcion NVARCHAR(255),
+    @descripcion varchar(50),
     @genero NVARCHAR(50)
 AS
 BEGIN
@@ -209,7 +209,7 @@ GO
 
 
 CREATE OR ALTER PROCEDURE Producto.InsertarCategoria
-    @nombre NVARCHAR(255)
+    @nombre varchar(50)
 AS
 BEGIN
     -- Verificar si ya existe la categoría
@@ -235,7 +235,7 @@ CREATE OR ALTER PROCEDURE Super.InsertarEmpleado
     @idEmpleado INT,
     @dni VARCHAR(9),
     @cuil VARCHAR(15),
-    @email NVARCHAR(50),
+    @email varchar(50),
     @cargo VARCHAR(15),
     @turno VARCHAR(15),
     @sucursal INT
@@ -263,7 +263,7 @@ GO
 CREATE OR ALTER PROCEDURE Producto.InsertarProducto
     @idProducto INT,
     @categoria INT,
-    @nombre NVARCHAR(255),
+    @nombre varchar(50),
     @precio DECIMAL(10, 2)
 AS
 BEGIN
@@ -342,11 +342,11 @@ GO
 
 CREATE OR ALTER PROCEDURE ModificarSucursal
     @idSucursal INT,
-    @sucursal NVARCHAR(255),
-    @ciudad NVARCHAR(255),
-    @direccion NVARCHAR(MAX),
-    @horario NVARCHAR(MAX),
-    @telefono NVARCHAR(255)
+    @sucursal varchar(50),
+    @ciudad varchar(30),
+    @direccion varchar(30),
+    @horario varchar(30),
+    @telefono varchar(20)
 AS
 BEGIN
     IF EXISTS (
@@ -375,7 +375,7 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarMedioPago
     @idMedioPago INT,
-    @descripcion NVARCHAR(255)
+    @descripcion varchar(30)
 AS
 BEGIN
     IF EXISTS (
@@ -397,8 +397,8 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarEmpleado
     @idEmpleado INT,
-    @email NVARCHAR(50),
-    @cargo VARCHAR(15),
+    @email varchar(30),
+    @cargo varchar(15),
     @turno VARCHAR(15),
     @sucursal INT
 AS
@@ -426,7 +426,7 @@ go
 CREATE OR ALTER PROCEDURE ModificarProducto
     @idProducto INT,
     @categoria INT,
-    @nombre NVARCHAR(255),
+    @nombre varchar(50),
     @precio DECIMAL(10,2)
 AS
 BEGIN
@@ -481,8 +481,8 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarTipoCliente
     @idTipoCliente INT,
-    @descripcion NVARCHAR(255),
-    @genero NVARCHAR(50)
+    @descripcion varchar(30),
+    @genero varchar(15)
 AS
 BEGIN
     IF EXISTS (
@@ -505,7 +505,7 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarCategoria
     @idCategoria INT,
-    @nombre NVARCHAR(255)
+    @nombre varchar(50)
 AS
 BEGIN
     IF EXISTS (
