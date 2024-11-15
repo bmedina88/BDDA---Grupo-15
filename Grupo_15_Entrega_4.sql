@@ -18,13 +18,15 @@ RECONFIGURE
 GO
 
 
-
---PRUEBA DE CONEXION CON EXCEL
-SELECT * FROM OPENROWSET(
-	'Microsoft.ACE.OLEDB.12.0',
-	'Excel 12.0;Database=C:\Users\beybr\OneDrive\Escritorio\TP_integrador_Archivos\Informacion_complementaria.xlsx',
-	'SELECT * FROM [medios de pago$]'
-)
+--Muestra la cantidad de registros esperados e importados. Usado para testing
+CREATE OR ALTER PROCEDURE Super.MostrarCantidadImportadaYEsperada (
+@cantidadEsperada int,
+@cantidadImportada int)
+AS
+BEGIN
+	SELECT @cantidadEsperada as CantidadEsperada, @cantidadImportada as CantidadImportada
+	--return;
+END
 GO
 
 
@@ -53,14 +55,26 @@ BEGIN
 			''SELECT * FROM [Sucursal$]'');'
 
 	EXEC sp_executesql @sql
+	
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = @@ROWCOUNT;
 
 	INSERT INTO Super.Sucursal(ciudad, sucursal, direccion, horario, telefono)
 	SELECT ciudad, sucursal, direccion, horario, telefono
 	FROM #SucursalTemp AS T
 	WHERE T.sucursal NOT IN (SELECT S.sucursal FROM Super.Sucursal AS S);
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d sucursales repetidas y no se importaron',10,1,@cantidadRepetida)
 END
 GO
-
 
 
 -- Importación Medios de Pago (Usa: Informacion_complementaria.xlsx)
@@ -82,12 +96,25 @@ BEGIN
 			''SELECT [F2] FROM [medios de pago$]'');'
 
 	EXEC sp_executesql @sql
+
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = @@ROWCOUNT;
 	
 
 	INSERT INTO Venta.MedioPago(descripcion)
 	SELECT descripcion
 	FROM #MedioPagoTemp as T
 	WHERE T.descripcion NOT IN (SELECT M.descripcion FROM Venta.MedioPago AS M);
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d Medios de Pagos repetidas y no se importaron',10,1,@cantidadRepetida)
 END
 GO
 
@@ -122,14 +149,29 @@ BEGIN
 
 	EXEC sp_executesql @sql;
 
-		WITH EmpleadoConFk AS
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = count(*)
+	FROM #EmpleadoTemp
+	WHERE legajo IS NOT NULL;
+
+	WITH EmpleadoConFk AS
 		(SELECT T.legajo, T.dni, T.cuil, T.emailPersonal, T.cargo, T.turno, (SELECT S.idSucursal FROM Super.Sucursal AS S WHERE S.sucursal=T.sucursal) AS idSucursal
 		FROM #EmpleadoTemp as T 
 		WHERE T.legajo IS NOT NULL)
-		INSERT INTO Super.Empleado(idEmpleado, dni, cuil, email, cargo, turno, sucursal)
+	INSERT INTO Super.Empleado(idEmpleado, dni, cuil, email, cargo, turno, sucursal)
 		SELECT * 
 		FROM EmpleadoConFk as F
-		WHERE F.legajo NOT IN (SELECT E.idEmpleado FROM Super.Empleado AS E);	
+		WHERE F.legajo NOT IN (SELECT E.idEmpleado FROM Super.Empleado AS E);
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d Empleados repetidas y no se importaron',10,1,@cantidadRepetida)
 END
 GO
 
@@ -155,11 +197,26 @@ BEGIN
 
 	EXEC sp_executesql @sql
 
+	
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = COUNT(*)
+	FROM (SELECT DISTINCT categoria FROM #CategoriaTemp) AS subConsulta;
+
 
 	INSERT INTO Producto.Categoria (nombre)
 	SELECT DISTINCT T.categoria
 	FROM #CategoriaTemp AS T
 	WHERE T.categoria NOT IN (SELECT C.nombre FROM Producto.Categoria AS C)
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d Categorias repetidas y no se importaron',10,1,@cantidadRepetida)
 END
 GO
 
@@ -188,11 +245,25 @@ BEGIN
 
 	EXEC sp_executesql @sql
 
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = @@ROWCOUNT;
+
 
 	INSERT INTO Producto.Producto (categoria, nombre, precio)
 	SELECT (SELECT C.idCategoria FROM Producto.Categoria AS C WHERE nombre='Electrónicos'), * 
 	FROM #ProductoElectronicoTemp AS T
 	WHERE T.producto NOT IN (SELECT P.nombre FROM Producto.Producto AS P)
+	
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d Productos Electronicos repetidos y no se importaron',10,1,@cantidadRepetida)
 END
 GO
 
@@ -222,6 +293,9 @@ BEGIN
 
 	EXEC sp_executesql @sql
 
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = @@ROWCOUNT;
+
 
 	--Creación de categorias no registradas 
 
@@ -241,6 +315,16 @@ BEGIN
 	SELECT *
 	FROM ProductoImportadoConFk AS C
 	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.nombre=C.nombre AND P.categoria=C.idCategoria) 
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d Productos Importados repetidos y no se importaron',10,1,@cantidadRepetida)
 END
 GO
 
@@ -295,6 +379,8 @@ BEGIN
 		);'
 	EXEC sp_executesql @sql2;
 
+	DECLARE @cantidadEsperada int;
+	SELECT @cantidadEsperada = @@ROWCOUNT;
 
 	WITH CategoriaConFk AS
 	(
@@ -313,6 +399,17 @@ BEGIN
 	SELECT *
 	FROM CatalogoConFk AS CACFK
 	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.categoria=CACFK.idCategoria AND P.nombre=CACFK.nombre)
+
+
+	--Informe errores/advertencias
+	DECLARE @cantidadImportada int;
+	SELECT @cantidadImportada = @@ROWCOUNT;
+	DECLARE @cantidadRepetida int;
+	SELECT @cantidadRepetida = @cantidadEsperada - @cantidadImportada;
+
+	EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperada, @cantidadImportada;
+	IF (@cantidadRepetida>0)
+		RAISERROR('Se encontraron %d Productos del Catalogo repetidos y no se importaron',10,1,@cantidadRepetida)
 END
 GO
 
@@ -351,6 +448,13 @@ BEGIN
 			CODEPAGE = ''65001''
 		);'
 	EXEC sp_executesql @sql;
+
+	--DECLARE @cantidadEsperadaVentaDetalle int;
+	--SELECT @cantidadEsperadaVentaDetalle = @@ROWCOUNT;
+
+	DECLARE @cantidadEsperadaFactura int;
+	SELECT @cantidadEsperadaFactura = COUNT(*)
+	FROM (SELECT DISTINCT idFactura FROM #VentaTemp) AS subconsulta;
 
 
 --Update para acentos
@@ -403,6 +507,9 @@ FROM #VentaTemp AS T
 WHERE NOT EXISTS (SELECT * FROM Venta.Factura AS F WHERE F.idfactura=T.idFactura)
 GROUP BY T.idFactura,T.tipoFactura, idPago, fecha, hora, empleado, medioPago, tipoCliente, genero
 
+DECLARE @cantidadImportadaFactura int;
+SELECT @cantidadImportadaFactura = @@ROWCOUNT;
+
 --Import VentaDetalle
 INSERT INTO Venta.VentaDetalle(cantidad, idfactura, producto)
 SELECT T.cantidad, (SELECT F.id FROM Venta.Factura AS F WHERE F.idfactura=T.idFactura),
@@ -410,6 +517,22 @@ SELECT T.cantidad, (SELECT F.id FROM Venta.Factura AS F WHERE F.idfactura=T.idFa
 FROM #VentaTemp AS T
 
 --NOTA: PENSAR UN UPDATE AL INGRESAR PRODUCTO REPETIDO 
+
+--Informe errores/advertencias
+--DECLARE @cantidadImportadaVentaDetalle int;
+--SELECT @cantidadImportadaVentaDetalle = @@ROWCOUNT;
+--DECLARE @cantidadRepetidaVentaDetalle int;
+--SELECT @cantidadRepetidaVentaDetalle = @cantidadEsperadaVentaDetalle - @cantidadImportadaVentaDetalle;
+DECLARE @cantidadRepetidaFactura int;
+SELECT @cantidadRepetidaFactura = @cantidadEsperadaFactura - @cantidadImportadaFactura;
+
+EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperadaFactura, @cantidadImportadaFactura;
+IF (@cantidadRepetidaFactura>0)
+	RAISERROR('Se encontraron %d Facturas repetidas y no se importaron',10,1,@cantidadRepetidaFactura)
+
+--EXEC Super.MostrarCantidadImportadaYEsperada @cantidadEsperadaVentaDetalle, @cantidadImportadaVentaDetalle;
+--IF (@cantidadRepetidaVentaDetalle>0)
+--	RAISERROR('Se encontraron %d DetalleVentas repetidas y no se importaron',10,1,@cantidadRepetidaVentaDetalle)
 END
 GO
 
