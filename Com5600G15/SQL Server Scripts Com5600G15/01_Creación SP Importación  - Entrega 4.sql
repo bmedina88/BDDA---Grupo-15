@@ -249,10 +249,11 @@ BEGIN
 	SELECT @cantidadEsperada = @@ROWCOUNT;
 
 
-	INSERT INTO Producto.Producto (categoria, nombre, precio)
-	SELECT (SELECT C.idCategoria FROM Producto.Categoria AS C WHERE nombre='Electrónicos'), * 
+	INSERT INTO Producto.Producto (categoria, nombre, precio,moneda)
+	SELECT (SELECT C.idCategoria FROM Producto.Categoria AS C WHERE nombre='Electrónicos'), producto,precio,'USD' as moneda
 	FROM #ProductoElectronicoTemp AS T
 	WHERE T.producto NOT IN (SELECT P.nombre FROM Producto.Producto AS P)
+
 	
 
 	--Informe errores/advertencias
@@ -311,8 +312,8 @@ BEGIN
 		SELECT (SELECT C.idCategoria FROM Producto.Categoria AS C WHERE T.categoria=C.nombre) AS idCategoria, T.nombre, T.precioPorUnidad
 		FROM #ProductoImportadoTemp AS T
 	)
-	INSERT INTO Producto.Producto (categoria, nombre, precio)
-	SELECT *
+	INSERT INTO Producto.Producto (categoria, nombre, precio,moneda)
+	SELECT idCategoria,nombre,precioPorUnidad,'ARS' as moneda
 	FROM ProductoImportadoConFk AS C
 	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.nombre=C.nombre AND P.categoria=C.idCategoria) 
 
@@ -395,8 +396,8 @@ BEGIN
 				WHERE CCFK.producto=T.categoria) AS idCategoria,  T.nombre, T.precio
 		FROM #CatalogoTemp AS T
 	)
-	INSERT INTO Producto.Producto (categoria, nombre, precio)
-	SELECT *
+	INSERT INTO Producto.Producto (categoria, nombre, precio,moneda)
+	SELECT idCategoria,nombre,precio,'ARS' as moneda
 	FROM CatalogoConFk AS CACFK
 	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.categoria=CACFK.idCategoria AND P.nombre=CACFK.nombre)
 
