@@ -40,11 +40,11 @@ END;
 
 CREATE TABLE Super.Sucursal(
 	idSucursal int IDENTITY(1,1) PRIMARY KEY,
-	sucursal nvarchar(255),
-	ciudad nvarchar(255),
-	direccion nvarchar(max),
-	horario nvarchar(max),
-	telefono nvarchar(255)
+	sucursal varchar(30),
+	ciudad varchar(30),
+	direccion varchar(200),
+	horario varchar(100),
+	telefono varchar(20)
 );
 go
 
@@ -54,7 +54,7 @@ BEGIN
 END;
 CREATE TABLE Venta.MedioPago(
 	idMedioPago int IDENTITY(1,1) PRIMARY KEY,
-	descripcion nvarchar(255)
+	descripcion varchar(50)
 );
 go
 
@@ -64,8 +64,8 @@ BEGIN
 END;
 CREATE TABLE Super.TipoCliente(
 	idTipoCliente int IDENTITY(1,1) PRIMARY KEY,
-	descripcion nvarchar(255),
-	genero nvarchar(50)
+	descripcion varchar(50),
+	genero varchar(50)
 );
 go
 IF OBJECT_ID(N'Producto.Categoria', N'U') IS NOT NULL
@@ -74,7 +74,7 @@ BEGIN
 END;
 CREATE TABLE Producto.Categoria(
 	idCategoria int IDENTITY(1,1) PRIMARY KEY,
-	nombre nvarchar(255)
+	nombre varchar(100)
 );
 go
 IF OBJECT_ID(N'Super.Empleado', N'U') IS NOT NULL
@@ -85,9 +85,9 @@ CREATE TABLE Super.Empleado(
 	idEmpleado int PRIMARY KEY,
 	dni varchar(max),
 	cuil varchar(max),
-	email nvarchar(max),
-	cargo varchar(15),
-	turno varchar(15),
+	email varchar(max),
+	cargo varchar(30),
+	turno varchar(30),
 	sucursal int REFERENCES Super.Sucursal(idSucursal)
 );
 go
@@ -96,10 +96,10 @@ BEGIN
     DROP TABLE Producto.Producto;
 END;
 CREATE TABLE Producto.Producto(
-	idProducto int primary key,
+	idProducto int IDENTITY(1,1) primary key,
 	categoria int REFERENCES Producto.Categoria(idCategoria),
-	nombre nvarchar(255),
-	precio DECIMAL(10, 2),
+	nombre varchar(150),
+	precio DECIMAL(10, 2)
 
 );
 go
@@ -112,9 +112,11 @@ CREATE TABLE Venta.Factura(
 	idfactura varchar(11),
 	fecha date,
 	hora time,
-	idpago nvarchar(50),
+	idpago varchar(50),
 	medioPago int REFERENCES Venta.MedioPago(idMedioPago),
-	empleado int REFERENCES Super.Empleado(idEmpleado)
+	empleado int REFERENCES Super.Empleado(idEmpleado),
+	cliente int REFERENCES Super.TipoCliente,
+	tipoFactura char(2)
 	);
 go
 
@@ -127,6 +129,7 @@ CREATE TABLE Venta.VentaDetalle(
 	producto int,
 	idfactura int REFERENCES Venta.Factura(id),
 	cantidad int,
+	precioUnitario DECIMAL(10, 2)
 );
 go
 --STORE PROCEDURE INSERCIÓN DATOS
@@ -151,7 +154,8 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La sucursal ya existe.';
+        RAISERROR('Error: La Sucursal ya existe.', 16, 1);
+
     END
 END;
 GO
@@ -173,7 +177,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El medio de pago ya existe.';
+        RAISERROR('Error: el medio de pago ya existe.', 16, 1);
     END
 END;
 GO
@@ -197,7 +201,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El tipo de cliente ya existe.';
+        RAISERROR('Error: el tipo de cliente ya existe.', 16, 1);
     END
 END;
 GO
@@ -221,7 +225,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La categoría ya existe.';
+        RAISERROR('Error: La categoria ya existe.', 16, 1);
     END
 END;
 GO
@@ -250,7 +254,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El empleado ya existe.';
+        RAISERROR('Error: El empleado ya existe.', 16, 1);
     END
 END;
 GO
@@ -276,7 +280,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El producto ya existe.';
+        RAISERROR('Error: El producto ya existe.', 16, 1);
     END
 END;
 GO
@@ -304,7 +308,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La factura ya existe.';
+        RAISERROR('Error: La factura ya existe.', 16, 1);
     END
 END;
 GO
@@ -329,7 +333,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El detalle de venta ya existe.';
+        RAISERROR('Error: el detalle de venta ya existe.', 16, 1);
     END
 END;
 GO
@@ -362,11 +366,12 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La sucursal no existe.';
+        RAISERROR('Error: La Sucursal no existe.', 16, 1);
     END
 END;
 
 go
+
 
 
 CREATE OR ALTER PROCEDURE ModificarMedioPago
@@ -386,7 +391,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El medio de pago no existe.';
+        RAISERROR('Error: el medio de pago no existe.', 16, 1);
     END
 END;
 go
@@ -414,7 +419,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El empleado no existe.';
+        RAISERROR('Error: el empleado no existe.', 16, 1);
     END
 END;
 go
@@ -440,7 +445,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El producto no existe.';
+        RAISERROR('Error: el producto no existe.', 16, 1);
     END
 END;
 go
@@ -470,7 +475,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La factura no existe.';
+        RAISERROR('Error: La factura no existe.', 16, 1);
     END
 END;
 go
@@ -494,7 +499,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El tipo de cliente no existe.';
+        RAISERROR('Error: El tipo de cliente no existe.', 16, 1);
     END
 END;
 go
@@ -516,7 +521,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La categoría no existe.';
+        RAISERROR('Error: La categoria no existe.', 16, 1);
     END
 END;
 go
@@ -542,7 +547,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El detalle de venta no existe.';
+       RAISERROR('Error: el detalle de venta no existe.', 16, 1);;
     END
 END;
 go
@@ -564,7 +569,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La sucursal no existe.';
+        RAISERROR('Error: La Sucursal no existe.', 16, 1);
     END
 END;
 go
@@ -584,7 +589,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El medio de pago no existe.';
+        RAISERROR('Error: el medio de pago no existe.', 16, 1);
     END
 END;
 go
@@ -607,7 +612,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El empleado no existe.';
+        RAISERROR('Error: El empleado no existe.', 16, 1);
     END
 END;
 GO
@@ -628,7 +633,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El producto no existe.';
+        RAISERROR('Error: El producto no existe.', 16, 1);
     END
 END;
 go
@@ -648,7 +653,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La factura no existe.';
+        RAISERROR('Error: La Factura no existe.', 16, 1);
     END
 END;
 go
@@ -668,7 +673,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El detalle de venta no existe.';
+        RAISERROR('Error: El detalle de venta no existe.', 16, 1);
     END
 END;
 go
@@ -688,7 +693,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'El tipo de cliente no existe.';
+        RAISERROR('Error: El tipo de cliente no existe.', 16, 1);
     END
 END;
 go
@@ -708,7 +713,7 @@ BEGIN
     END
     ELSE
     BEGIN
-        PRINT 'La categoría no existe.';
+        RAISERROR('Error: La categoria no existe.', 16, 1);
     END
 END;
 go
