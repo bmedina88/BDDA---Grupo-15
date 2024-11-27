@@ -42,8 +42,8 @@ CREATE TABLE Super.Sucursal(
 	idSucursal int IDENTITY(1,1) PRIMARY KEY,
 	sucursal varchar(30),
 	ciudad varchar(30),
-	direccion varchar(200),
-	horario varchar(100),
+	direccion varchar(50),
+	horario varchar(20),
 	telefono varchar(20)
 );
 go
@@ -74,7 +74,7 @@ BEGIN
 END;
 CREATE TABLE Producto.Categoria(
 	idCategoria int IDENTITY(1,1) PRIMARY KEY,
-	nombre varchar(100)
+	nombre varchar(50)
 );
 go
 IF OBJECT_ID(N'Super.Empleado', N'U') IS NOT NULL
@@ -96,10 +96,11 @@ BEGIN
     DROP TABLE Producto.Producto;
 END;
 CREATE TABLE Producto.Producto(
-	idProducto int IDENTITY(1,1) primary key,
+	idProducto int primary key,
 	categoria int REFERENCES Producto.Categoria(idCategoria),
 	nombre varchar(150),
-	precio DECIMAL(10, 2)
+	precio DECIMAL(10, 2),
+	moneda varchar(10)
 
 );
 go
@@ -126,20 +127,21 @@ BEGIN
 END;
 CREATE TABLE Venta.VentaDetalle(
 	idVenta int IDENTITY(1,1) PRIMARY KEY,
-	producto int,
+	producto int References producto.producto(idProducto),
 	idfactura int REFERENCES Venta.Factura(id),
 	cantidad int,
-	precioUnitario DECIMAL(10, 2)
+	precioUnitario DECIMAL(10, 2),
+	moneda varchar(10)
 );
 go
 --STORE PROCEDURE INSERCIÓN DATOS
 
 CREATE OR ALTER PROCEDURE Super.InsertarSucursal
-    @sucursal NVARCHAR(255),
-    @ciudad NVARCHAR(255),
-    @direccion NVARCHAR(MAX),
-    @horario NVARCHAR(MAX),
-    @telefono NVARCHAR(255)
+    @sucursal VARCHAR(50),
+    @ciudad VARCHAR(50),
+    @direccion VARCHAR(50),
+    @horario VARCHAR(50),
+    @telefono VARCHAR(50)
 AS
 BEGIN
     -- Verificar si ya existe la sucursal
@@ -162,7 +164,7 @@ GO
 
 
 CREATE OR ALTER PROCEDURE Venta.InsertarMedioPago
-    @descripcion NVARCHAR(255)
+    @descripcion VARCHAR(50)
 AS
 BEGIN
     -- Verificar si ya existe el medio de pago
@@ -185,8 +187,8 @@ GO
 
 
 CREATE OR ALTER PROCEDURE Super.InsertarTipoCliente
-    @descripcion NVARCHAR(255),
-    @genero NVARCHAR(50)
+    @descripcion VARCHAR(50),
+    @genero VARCHAR(50)
 AS
 BEGIN
     -- Verificar si ya existe el tipo de cliente
@@ -210,7 +212,7 @@ GO
 
 
 CREATE OR ALTER PROCEDURE Producto.InsertarCategoria
-    @nombre NVARCHAR(255)
+    @nombre NVARCHAR(50)
 AS
 BEGIN
     -- Verificar si ya existe la categoría
@@ -265,7 +267,8 @@ CREATE OR ALTER PROCEDURE Producto.InsertarProducto
     @idProducto INT,
     @categoria INT,
     @nombre NVARCHAR(255),
-    @precio DECIMAL(10, 2)
+    @precio DECIMAL(10, 2),
+	@moneda varchar(10)
 AS
 BEGIN
     -- Verificar si el producto ya existe
@@ -275,12 +278,16 @@ BEGIN
         WHERE idProducto = @idProducto OR nombre = @nombre
     )
     BEGIN
-        INSERT INTO Producto.Producto (idProducto, categoria, nombre, precio)
-        VALUES (@idProducto, @categoria, @nombre, @precio);
+        INSERT INTO Producto.Producto (idProducto, categoria, nombre, precio,moneda)
+        VALUES (@idProducto, @categoria, @nombre, @precio,@moneda);
     END
     ELSE
     BEGIN
-        RAISERROR('Error: El producto ya existe.', 16, 1);
+        update Producto.Producto
+		set categoria = @categoria,
+		precio = @precio,
+		moneda = @moneda
+		WHERE idProducto = @idProducto OR nombre = @nombre
     END
 END;
 GO
@@ -291,9 +298,11 @@ CREATE OR ALTER PROCEDURE Venta.InsertarFactura
     @idFactura VARCHAR(11),
     @fecha DATE,
     @hora TIME,
-    @idPago NVARCHAR(50),
+    @idPago VARCHAR(50),
     @medioPago INT,
-    @empleado INT
+    @empleado INT,
+	@cliente INT,
+	@tipoFactura char(2)
 AS
 BEGIN
     -- Verificar si la factura ya existe
@@ -303,8 +312,8 @@ BEGIN
         WHERE idFactura = @idFactura
     )
     BEGIN
-        INSERT INTO Venta.Factura (idFactura, fecha, hora, idPago, medioPago, empleado)
-        VALUES (@idFactura, @fecha, @hora, @idPago, @medioPago, @empleado);
+        INSERT INTO Venta.Factura (idFactura, fecha, hora, idPago, medioPago, empleado,cliente,tipoFactura)
+        VALUES (@idFactura, @fecha, @hora, @idPago, @medioPago, @empleado,@cliente,@tipoFactura);
     END
     ELSE
     BEGIN
@@ -315,12 +324,19 @@ GO
 
 
 
+
+
+
 CREATE OR ALTER PROCEDURE Venta.InsertarVentaDetalle
     @producto INT,
     @idFactura INT,
     @cantidad INT
 AS
 BEGIN
+declare @precioUnitario decimal(10,2);
+declare @moneda varchar(10);
+select @precioUnitario = precio from Producto.Producto where idProducto = @producto
+select @moneda = moneda from Producto.Producto where idProducto = @producto
     -- Verificar si el detalle de la venta ya existe
     IF NOT EXISTS (
         SELECT 1
@@ -328,12 +344,15 @@ BEGIN
         WHERE producto = @producto AND idFactura = @idFactura
     )
     BEGIN
-        INSERT INTO Venta.VentaDetalle (producto, idFactura, cantidad)
-        VALUES (@producto, @idFactura, @cantidad);
+
+        INSERT INTO Venta.VentaDetalle (producto, idFactura, cantidad,precioUnitario,moneda)
+        VALUES (@producto, @idFactura, @cantidad,@precioUnitario,@moneda);
     END
     ELSE
     BEGIN
-        RAISERROR('Error: el detalle de venta ya existe.', 16, 1);
+        update Venta.VentaDetalle
+		set cantidad = cantidad + @cantidad
+		WHERE producto = @producto AND idFactura = @idFactura
     END
 END;
 GO
@@ -343,11 +362,11 @@ GO
 
 CREATE OR ALTER PROCEDURE ModificarSucursal
     @idSucursal INT,
-    @sucursal NVARCHAR(255),
-    @ciudad NVARCHAR(255),
-    @direccion NVARCHAR(MAX),
-    @horario NVARCHAR(MAX),
-    @telefono NVARCHAR(255)
+    @sucursal VARCHAR(30),
+    @ciudad VARCHAR(30),
+    @direccion VARCHAR(50),
+    @horario VARCHAR(20),
+    @telefono VARCHAR(20)
 AS
 BEGIN
     IF EXISTS (
@@ -376,7 +395,7 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarMedioPago
     @idMedioPago INT,
-    @descripcion NVARCHAR(255)
+    @descripcion VARCHAR(50)
 AS
 BEGIN
     IF EXISTS (
@@ -398,7 +417,7 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarEmpleado
     @idEmpleado INT,
-    @email NVARCHAR(50),
+    @email VARCHAR(50),
     @cargo VARCHAR(15),
     @turno VARCHAR(15),
     @sucursal INT
@@ -427,8 +446,9 @@ go
 CREATE OR ALTER PROCEDURE ModificarProducto
     @idProducto INT,
     @categoria INT,
-    @nombre NVARCHAR(255),
-    @precio DECIMAL(10,2)
+    @nombre VARCHAR(255),
+    @precio DECIMAL(10,2),
+	@moneda varchar(10)
 AS
 BEGIN
     IF EXISTS (
@@ -440,7 +460,8 @@ BEGIN
         UPDATE Producto.Producto
         SET categoria = @categoria,
             nombre = @nombre,
-            precio = @precio
+            precio = @precio,
+			moneda = @moneda
         WHERE idProducto = @idProducto;
     END
     ELSE
@@ -482,8 +503,8 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarTipoCliente
     @idTipoCliente INT,
-    @descripcion NVARCHAR(255),
-    @genero NVARCHAR(50)
+    @descripcion VARCHAR(50),
+    @genero VARCHAR(20)
 AS
 BEGIN
     IF EXISTS (
@@ -506,7 +527,7 @@ go
 
 CREATE OR ALTER PROCEDURE ModificarCategoria
     @idCategoria INT,
-    @nombre NVARCHAR(255)
+    @nombre VARCHAR(30)
 AS
 BEGIN
     IF EXISTS (
@@ -539,15 +560,31 @@ BEGIN
         WHERE idVenta = @idVenta
     )
     BEGIN
-        -- Actualizar los campos producto y cantidad
-        UPDATE Venta.VentaDetalle
-        SET producto = @producto,
-            cantidad = @cantidad
-        WHERE idVenta = @idVenta;
+	if Exists(
+			select 1
+			from Producto.Producto
+			where @producto = idProducto
+			)
+			begin
+				declare @precioUnitario decimal(10,2);
+				declare @moneda varchar(10);
+				select @precioUnitario = precio from Producto.Producto where @producto = idProducto
+				select @moneda = moneda from Producto.Producto where @producto = idProducto
+				UPDATE Venta.VentaDetalle
+				SET producto = @producto,
+				cantidad = @cantidad,
+				precioUnitario = @precioUnitario,
+				moneda= @moneda
+				WHERE idVenta = @idVenta;
+			end
+			else
+			begin
+			RAISERROR('Error: el Producto no Existe', 16, 1);
+			end
     END
     ELSE
     BEGIN
-       RAISERROR('Error: el detalle de venta no existe.', 16, 1);;
+       RAISERROR('Error: el detalle de venta no existe.', 16, 1);
     END
 END;
 go
@@ -717,3 +754,59 @@ BEGIN
     END
 END;
 go
+----------------------------
+
+create or alter procedure venta.cancelarVenta
+as
+begin
+throw 50000,'Error',1;
+end
+
+-----pesificar los productos----
+
+create or alter procedure producto.pesificarProducto
+as
+begin
+-- Definir los parámetros para construir la URL de la API
+DECLARE @ruta NVARCHAR(128) = 'https://dolarapi.com/v1/dolares/blue'
+DECLARE @url NVARCHAR(256) = @ruta  -- En este caso no es necesario concatenar más parámetros
+
+-- Variables para manejar el objeto OLE y la respuesta JSON
+DECLARE @Object INT
+DECLARE @json TABLE(DATA NVARCHAR(MAX))
+DECLARE @respuesta NVARCHAR(MAX)
+
+-- Crear el objeto OLE para realizar la solicitud HTTP
+EXEC sp_OACreate 'MSXML2.XMLHTTP', @Object OUT
+EXEC sp_OAMethod @Object, 'OPEN', NULL, 'GET', @url, 'FALSE' -- Definir la solicitud HTTP GET
+EXEC sp_OAMethod @Object, 'SEND'                             -- Enviar la solicitud
+EXEC sp_OAMethod @Object, 'RESPONSETEXT', @respuesta OUTPUT  -- Capturar la respuesta
+
+-- Insertar la respuesta JSON en una tabla variable para procesarla
+INSERT INTO @json
+EXEC sp_OAGetProperty @Object, 'RESPONSETEXT'
+
+-- Cerrar y liberar el objeto OLE
+EXEC sp_OADestroy @Object
+
+declare @ValorCambio decimal(10,2);
+
+-- Procesar el JSON y extraer los datos relevantes
+DECLARE @datos NVARCHAR(MAX) = (SELECT DATA FROM @json)
+SELECT @ValorCambio=Venta FROM OPENJSON(@datos)
+WITH
+(
+    [Compra] DECIMAL(10, 2) '$.compra',
+    [Venta] DECIMAL(10, 2) '$.venta',
+    [Casa] NVARCHAR(50) '$.casa',
+    [Nombre] NVARCHAR(50) '$.nombre',
+    [Moneda] NVARCHAR(10) '$.moneda',
+    [FechaActualizacion] NVARCHAR(50) '$.fechaActualizacion'
+);
+
+UPDATE Producto.Producto
+SET precio = precio * @ValorCambio,
+    moneda = 'ARS'  -- Cambiar la moneda a pesos
+WHERE moneda = 'USD';
+
+end

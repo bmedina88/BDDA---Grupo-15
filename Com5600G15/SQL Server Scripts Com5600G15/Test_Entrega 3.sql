@@ -11,7 +11,9 @@
 
 use Com5600G15;
 
------stores procedures insersion--------
+
+-------Test agregar sucursal-----
+
 EXEC Super.InsertarSucursal 
     @sucursal = 'Sucursal Central',
     @ciudad = 'Ciudad A',
@@ -19,46 +21,17 @@ EXEC Super.InsertarSucursal
     @horario = '08:00-18:00',
     @telefono = '123-456-789';
 
-EXEC Venta.InsertarMedioPago 
-    @descripcion = 'Tarjeta de Crédito';
+	---Insertar sucursal duplicado---
+		EXEC Super.InsertarSucursal 
+		@sucursal = 'Sucursal Central',
+		@ciudad = 'Ciudad A',
+		@direccion = 'Av. Illia 123',
+		@horario = '08:00-18:00',
+		@telefono = '123-456-789';
 
-EXEC Super.InsertarTipoCliente 
-    @descripcion = 'Corporativo',
-    @genero = 'Masculino';
+select * from Super.Sucursal
 
-EXEC Producto.InsertarCategoria 
-    @nombre = 'Electrodomésticos';
-
-EXEC Super.InsertarEmpleado 
-    @idEmpleado = 1,
-    @dni = '12345678',
-    @cuil = '20-12345678-9',
-    @email = 'empleado1@empresa.com',
-    @cargo = 'Gerente',
-    @turno = 'Mañana',
-    @sucursal = 1; -- Asegúrate de que la sucursal con ID 1 ya exista
-
-EXEC Producto.InsertarProducto 
-    @idProducto = 1,
-    @categoria = 1, -- Asegúrate de que la categoría con ID 1 ya exista
-    @nombre = 'Aspiradora',
-    @precio = 199.99;
-
-EXEC Venta.InsertarFactura 
-    @idFactura = 'F-0001',
-    @fecha = '2024-11-10',
-    @hora = '14:30:00',
-    @idPago = 'P-12345',
-    @medioPago = 1, -- Asegúrate de que el medio de pago con ID 1 ya exista
-    @empleado = 1; -- Asegúrate de que el empleado con ID 1 ya exista
-
-
-EXEC Venta.InsertarVentaDetalle 
-    @producto = 1, -- Asegúrate de que el producto con ID 1 ya exista
-    @idFactura = 1, -- Asegúrate de que la factura con ID 1 ya exista
-    @cantidad = 2;
-
-----------------------stores procedures update------------------------------------------------------------------------
+-----Actualizar Sucursal-----
 EXEC ModificarSucursal 
     @idSucursal = 1,
     @sucursal = 'Sucursal Norte',
@@ -67,55 +40,275 @@ EXEC ModificarSucursal
     @horario = '08:00-17:00',
     @telefono = '987-654-321';
 
-EXEC ModificarMedioPago 
-    @idMedioPago = 1,
-    @descripcion = 'Transferencia Bancaria';
+	-----Actualizar Sucursal inexistente
+	EXEC ModificarSucursal 
+    @idSucursal = 255,
+    @sucursal = 'Villegas 1',
+    @ciudad = 'Ciudad Evita',
+    @direccion = 'Av. Secundaria 456',
+    @horario = '08:00-17:00',
+    @telefono = '987-654-321';
+
+-----Test agregar empleado--------
+
+EXEC Super.InsertarEmpleado 
+    @idEmpleado = 1,
+    @dni = '12345678',
+    @cuil = '20-12345678-9',
+    @email = 'empleado1@empresa.com',
+    @cargo = 'Gerente',
+    @turno = 'Mañana',
+    @sucursal = 1; 
+	go
+	-----empleado duplicado-----
+
+	EXEC Super.InsertarEmpleado 
+    @idEmpleado = 1,
+    @dni = '12345678',
+    @cuil = '20-12345678-9',
+    @email = 'empleado1@empresa.com',
+    @cargo = 'Gerente',
+    @turno = 'Mañana',
+    @sucursal = 1; 
+
+select * from Super.Empleado
+
+------Actualizar Empleado--------
 
 EXEC ModificarEmpleado 
     @idEmpleado = 1,
     @email = 'nuevoempleado@empresa.com',
     @cargo = 'Supervisor',
     @turno = 'Tarde',
-    @sucursal = 1; -- asegurarse de que la sucursal con ID exista
+    @sucursal = 3; 
+
+	---Actualizar empleado inexistente ----
+EXEC ModificarEmpleado 
+    @idEmpleado = 55,
+    @email = 'nuevoempleado@empresa.com',
+    @cargo = 'Supervisor',
+    @turno = 'Tarde',
+    @sucursal = 1; 
+
+
+-------------Insertar medio de Pago-----
+
+EXEC Venta.InsertarMedioPago 
+    @descripcion = 'Tarjeta de Crédito';
+	---Insertar medio de Pago duplicado----
+
+		EXEC Venta.InsertarMedioPago 
+		@descripcion = 'Tarjeta de Crédito';
+
+select * from Venta.MedioPago
+-----Actualizar medio de Pago-----
+
+EXEC ModificarMedioPago 
+    @idMedioPago = 1,
+    @descripcion = 'Debito';
+	---Actualizar medio de pago inexistente----
+
+	EXEC ModificarMedioPago 
+    @idMedioPago = 22,
+    @descripcion = 'Wallet';
+
+---------Insertar tipoCliente-------
+
+EXEC Super.InsertarTipoCliente 
+    @descripcion = 'Corporativo',
+    @genero = 'Masculino';
+
+	---Insertar tipoCliente duplicado---
+	EXEC Super.InsertarTipoCliente 
+    @descripcion = 'Corporativo',
+    @genero = 'Masculino';
+
+-----Actualizar tipoCliente-------
+
+select * from Super.TipoCliente
+
+EXEC ModificarTipoCliente 
+    @idTipoCliente = 1,
+    @descripcion = 'Mayorista',
+    @genero = 'Masculino';
+
+	----Actualizar tipoCliente inexistente---
+	EXEC ModificarTipoCliente 
+    @idTipoCliente = 22,
+    @descripcion = 'Minorista',
+    @genero = 'Masculino';
+
+----------Insertar Categoria--------
+
+EXEC Producto.InsertarCategoria 
+    @nombre = 'Electrodomésticos';
+	-----Insertar CategoriaDuplicado------
+	EXEC Producto.InsertarCategoria 
+    @nombre = 'Electrodomésticos';
+
+----Actualizar Categoria----
+select * from Producto.Categoria
+
+EXEC ModificarCategoria 
+    @idCategoria = 1,
+    @nombre = 'Electrodomésticos Pequeños';
+	-----Actualizar CategoriaInexistente---
+	EXEC ModificarCategoria 
+    @idCategoria = 22,
+    @nombre = 'Electrodomésticos Pequeños';
+
+----Insertar Producto----
+
+EXEC Producto.InsertarProducto 
+    @idProducto = 1,
+    @categoria = 1, 
+    @nombre = 'Aspiradora',
+    @precio = 200000.00,
+	@moneda = 'ARS';
+
+select * from Producto.Producto 
+
+----si el producto existe actualizar
+
+EXEC Producto.InsertarProducto 
+    @idProducto = 1,
+    @categoria = 1, 
+    @nombre = 'Pc Gamer i7',
+    @precio = 1000.00,
+	@moneda = 'USD';
+
+----Modificar Producto-----
 
 EXEC ModificarProducto 
     @idProducto = 1,
     @categoria = 1, -- asegurarse de que la categoría con ID exista
     @nombre = 'Aspiradora Industrial',
-    @precio = 250.75;
+    @precio = 250.75,
+	@moneda = 'USD';
+	---Modificar producto Inexistente
+		EXEC ModificarProducto 
+		@idProducto = 66,
+		@categoria = 1, -- asegurarse de que la categoría con ID exista
+		@nombre = 'Aspiradora Industrial',
+		@precio = 250.75,
+		@moneda = 'USD';
 
-EXEC ModificarFactura 
-    @id = 1,
-    @fecha = '2024-12-01',
-    @hora = '15:45:00',
-    @idPago = 'P-123456',
-    @medioPago = 1, -- asegurarse de que el medio de pago con ID exista
-    @empleado = 1;  -- asegurarse de que el empleado con ID  exista
+----Procedure para cambiar de USD a pesos usando API's -------
 
-EXEC ModificarTipoCliente 
-    @idTipoCliente = 1,
-    @descripcion = 'Mayorista',
-    @genero = 'Indistinto';
+exec Producto.pesificarProducto
 
-EXEC ModificarCategoria 
-    @idCategoria = 1,
-    @nombre = 'Electrodomésticos Pequeños';
+-----------Test de compras-------------
+begin transaction 
+begin try
+	declare @error INT;
 
-EXEC ModificarVentaDetalle 
-    @idVenta = 1,
-    @producto = 3, -- asegurarse de que el producto con ID 1exista
-    @cantidad = 10;
+	exec @error = Venta.InsertarFactura 
+    @idFactura = 'F-0001',
+    @fecha = '2024-11-10',
+    @hora = '14:30:00',
+    @idPago = 'P-12345',
+    @medioPago = 1, 
+    @empleado = 1, 
+	@cliente = 1,
+	@tipoFactura = 'A';
+	if @error <> 0 --- verificar si ocurrio algun error
+	begin 
+		throw 50000 , 'ERROR' ,1;
+	end
+	------insertamos en ventas detalles los productos------
 
------------------------Stores procedures para eliminar---------------------
+	DECLARE @idFactura INT;
+
+	SELECT @idFactura = id 
+	FROM Venta.Factura 
+	WHERE idfactura = 'F-0001';
+
+	EXEC Venta.InsertarVentaDetalle 
+		@producto = 1, 
+		@idFactura = @idFactura, 
+		@cantidad = 2;
+
+--------------Si insertamos un producto no existente se revierte la operacion y elimina la factura---------
+
+/*	EXEC Venta.InsertarVentaDetalle 
+		@producto = 5, 
+		@idFactura = @idFactura, 
+		@cantidad = 2;
+*/
+	------ Volvemos a ingresar el mismo producto, (se le sumara la cantidad a la venta detalle)----
+
+/*
+	EXEC Venta.InsertarVentaDetalle 
+		@producto = 1, 
+		@idFactura = @idFactura, 
+		@cantidad = 2;
+*/
+
+------ Si el comprador se arrepiente de la compra ---
+
+
+	exec venta.cancelarVenta
+
+
+	commit transaction
+	print 'Venta realizado con exito';
+
+end try
+	begin catch
+	rollback transaction;
+		RAISERROR('Error: no se pudo concretar la venta', 16, 1);
+	end catch
+
+
+select * from Venta.Factura
+select * from Venta.VentaDetalle
+
+
+-----------------------eliminar---------------------
 
 EXEC EliminarVentaDetalle @idVenta = 1;
+go
 EXEC EliminarFactura @id = 1;
+go
 EXEC EliminarProducto @idProducto = 1;
+go
 EXEC EliminarEmpleado @idEmpleado = 1;
+go
 EXEC EliminarSucursal @idSucursal = 1;
+go
 EXEC EliminarMedioPago @idMedioPago = 1;
+go
 EXEC EliminarTipoCliente @idTipoCliente = 1;
+go
 EXEC EliminarCategoria @idCategoria = 1;
+go
 
+-------------Eliminar inexistentes------------
+
+EXEC EliminarVentaDetalle @idVenta = 17;
+go
+EXEC EliminarFactura @id = 17;
+go
+EXEC EliminarProducto @idProducto = 17;
+go
+EXEC EliminarEmpleado @idEmpleado = 17;
+go
+EXEC EliminarSucursal @idSucursal = 17;
+go
+EXEC EliminarMedioPago @idMedioPago = 17;
+go
+EXEC EliminarTipoCliente @idTipoCliente = 17;
+go
+EXEC EliminarCategoria @idCategoria = 17;
+go
 
 ---------------------------------------------------------------------------
+
+select * from Venta.VentaDetalle
+select * from Venta.Factura
+select * from Producto.Producto
+select * from Super.Empleado
+select * from Super.Sucursal
+select * from Venta.MedioPago
+select * from Super.TipoCliente
+select * from Producto.Categoria
