@@ -32,7 +32,7 @@ EXEC Super.InsertarSucursal
 select * from Super.Sucursal
 
 -----Actualizar Sucursal-----
-EXEC ModificarSucursal 
+EXEC super.ModificarSucursal 
     @idSucursal = 1,
     @sucursal = 'Sucursal Norte',
     @ciudad = 'Ciudad B',
@@ -41,7 +41,7 @@ EXEC ModificarSucursal
     @telefono = '987-654-321';
 
 	-----Actualizar Sucursal inexistente
-	EXEC ModificarSucursal 
+	EXEC super.ModificarSucursal 
     @idSucursal = 255,
     @sucursal = 'Villegas 1',
     @ciudad = 'Ciudad Evita',
@@ -75,7 +75,7 @@ select * from Super.Empleado
 
 ------Actualizar Empleado--------
 
-EXEC ModificarEmpleado 
+EXEC super.ModificarEmpleado 
     @idEmpleado = 1,
     @email = 'nuevoempleado@empresa.com',
     @cargo = 'Supervisor',
@@ -83,7 +83,7 @@ EXEC ModificarEmpleado
     @sucursal = 3; 
 
 	---Actualizar empleado inexistente ----
-EXEC ModificarEmpleado 
+EXEC super.ModificarEmpleado 
     @idEmpleado = 55,
     @email = 'nuevoempleado@empresa.com',
     @cargo = 'Supervisor',
@@ -103,12 +103,12 @@ EXEC Venta.InsertarMedioPago
 select * from Venta.MedioPago
 -----Actualizar medio de Pago-----
 
-EXEC ModificarMedioPago 
+EXEC venta.ModificarMedioPago 
     @idMedioPago = 1,
     @descripcion = 'Debito';
 	---Actualizar medio de pago inexistente----
 
-	EXEC ModificarMedioPago 
+	EXEC venta.ModificarMedioPago 
     @idMedioPago = 22,
     @descripcion = 'Wallet';
 
@@ -127,13 +127,13 @@ EXEC Super.InsertarTipoCliente
 
 select * from Super.TipoCliente
 
-EXEC ModificarTipoCliente 
+EXEC super.ModificarTipoCliente 
     @idTipoCliente = 1,
     @descripcion = 'Mayorista',
     @genero = 'Masculino';
 
 	----Actualizar tipoCliente inexistente---
-	EXEC ModificarTipoCliente 
+	EXEC super.ModificarTipoCliente 
     @idTipoCliente = 22,
     @descripcion = 'Minorista',
     @genero = 'Masculino';
@@ -149,11 +149,11 @@ EXEC Producto.InsertarCategoria
 ----Actualizar Categoria----
 select * from Producto.Categoria
 
-EXEC ModificarCategoria 
+EXEC producto.ModificarCategoria 
     @idCategoria = 1,
     @nombre = 'Electrodomésticos Pequeños';
 	-----Actualizar CategoriaInexistente---
-	EXEC ModificarCategoria 
+	EXEC producto.ModificarCategoria 
     @idCategoria = 22,
     @nombre = 'Electrodomésticos Pequeños';
 
@@ -179,14 +179,14 @@ EXEC Producto.InsertarProducto
 
 ----Modificar Producto-----
 
-EXEC ModificarProducto 
+EXEC producto.ModificarProducto 
     @idProducto = 1,
     @categoria = 1, -- asegurarse de que la categoría con ID exista
     @nombre = 'Aspiradora Industrial',
     @precio = 250.75,
 	@moneda = 'USD';
 	---Modificar producto Inexistente
-		EXEC ModificarProducto 
+		EXEC producto.ModificarProducto 
 		@idProducto = 66,
 		@categoria = 1, -- asegurarse de que la categoría con ID exista
 		@nombre = 'Aspiradora Industrial',
@@ -246,10 +246,6 @@ begin try
 
 ------ Si el comprador se arrepiente de la compra ---
 
-
-	exec venta.cancelarVenta
-
-
 	commit transaction
 	print 'Venta realizado con exito';
 
@@ -266,40 +262,40 @@ select * from Venta.VentaDetalle
 
 -----------------------eliminar---------------------
 
-EXEC EliminarVentaDetalle @idVenta = 1;
+EXEC NotaCredito.EliminarVentaDetalle @idVenta = 1;
 go
-EXEC EliminarFactura @id = 1;
+EXEC NotaCredito.EliminarFactura @id = 1;
 go
-EXEC EliminarProducto @idProducto = 1;
+EXEC producto.EliminarProducto @idProducto = 1;
 go
-EXEC EliminarEmpleado @idEmpleado = 1;
+EXEC super.EliminarEmpleado @idEmpleado = 1;
 go
-EXEC EliminarSucursal @idSucursal = 1;
+EXEC super.EliminarSucursal @idSucursal = 1;
 go
-EXEC EliminarMedioPago @idMedioPago = 1;
+EXEC venta.EliminarMedioPago @idMedioPago = 1;
 go
-EXEC EliminarTipoCliente @idTipoCliente = 1;
+EXEC super.EliminarTipoCliente @idTipoCliente = 1;
 go
-EXEC EliminarCategoria @idCategoria = 1;
+EXEC producto.EliminarCategoria @idCategoria = 1;
 go
 
 -------------Eliminar inexistentes------------
 
-EXEC EliminarVentaDetalle @idVenta = 17;
+EXEC NotaCredito.EliminarVentaDetalle @idVenta = 17;
 go
-EXEC EliminarFactura @id = 17;
+EXEC NotaCredito.EliminarFactura @id = 17;
 go
-EXEC EliminarProducto @idProducto = 17;
+EXEC producto.EliminarProducto @idProducto = 17;
 go
-EXEC EliminarEmpleado @idEmpleado = 17;
+EXEC super.EliminarEmpleado @idEmpleado = 17;
 go
-EXEC EliminarSucursal @idSucursal = 17;
+EXEC super.EliminarSucursal @idSucursal = 17;
 go
-EXEC EliminarMedioPago @idMedioPago = 17;
+EXEC venta.EliminarMedioPago @idMedioPago = 17;
 go
-EXEC EliminarTipoCliente @idTipoCliente = 17;
+EXEC super.EliminarTipoCliente @idTipoCliente = 17;
 go
-EXEC EliminarCategoria @idCategoria = 17;
+EXEC producto.EliminarCategoria @idCategoria = 17;
 go
 
 ---------------------------------------------------------------------------

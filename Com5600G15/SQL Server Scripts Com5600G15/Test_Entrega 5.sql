@@ -18,21 +18,23 @@ EXECUTE AS LOGIN = 'supervisor';
 -- Ejecuta comandos en el contexto de 'supervisor'
 SELECT CURRENT_USER AS 'Login Actual';
 
--- Revertir al login original
-REVERT;
-
--- Cambiar al login 'usuarioBasico'
-EXECUTE AS LOGIN = 'usuarioBasico';
--- Ejecuta comandos en el contexto de 'usuarioBasico'
-SELECT CURRENT_USER AS 'Login Actual';
 
 select * from Venta.Factura
 select * from Producto.Producto
 
-EXEC GenerarNotaCredito
-    @idFactura = 1,        -- ID de la factura creada
-    @idProducto = 1,       -- ID del producto creado
-    @valorCredito = 100.00-- Valor de la nota de crédito
+EXEC NotaCredito.GenerarNotaCredito
+    @idFactura = 1,       
+    @idProducto = 1,     
+    @cantidad = 1
+
+select * from NotaCredito.NotaCredito
+
+exec NotaCredito.eliminarNotaCredito
+
+
+select * from Super.Empleado
+exec super.encriptarEmpleados 'ClaveSeguraParaEmpleados'
+select * from Super.Empleado
 
 ----------------------PERMISOS----------------------------------
 SELECT 
@@ -47,3 +49,27 @@ JOIN sys.objects AS obj
     ON perms.major_id = obj.object_id
      
 ---------------------------------------------------------------------
+-- Revertir al login original
+REVERT;
+------------------------------------------------
+-- Cambiar al login 'usuarioBasico'
+EXECUTE AS LOGIN = 'cajero';
+-- Ejecuta comandos en el contexto de 'usuarioBasico'
+SELECT CURRENT_USER AS 'Login Actual';
+
+select * from Venta.Factura
+select * from Producto.Producto
+
+EXEC NotaCredito.GenerarNotaCredito
+    @idFactura = 1,       
+    @idProducto = 1,     
+    @cantidad = 1
+
+select * from NotaCredito.NotaCredito
+
+exec NotaCredito.eliminarNotaCredito
+
+
+select * from Super.Empleado
+exec super.encriptarEmpleados 'ClaveSeguraParaEmpleados'
+select * from Super.Empleado

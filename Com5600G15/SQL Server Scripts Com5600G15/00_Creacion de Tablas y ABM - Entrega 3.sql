@@ -30,6 +30,8 @@ CREATE SCHEMA Producto;
 GO
 CREATE SCHEMA Super;
 GO
+create schema NotaCredito;
+go
 --Tablas
 
 -- Verificar si la tabla existe y eliminarla
@@ -134,6 +136,23 @@ CREATE TABLE Venta.VentaDetalle(
 	moneda varchar(10)
 );
 go
+
+
+
+IF OBJECT_ID(N'NotaCredito.NotaCredito', N'U') IS NOT NULL
+BEGIN
+    DROP TABLE NotaCredito.NotaCredito;
+END;
+CREATE TABLE NotaCredito.NotaCredito (
+    idNotaCredito INT IDENTITY(1,1) PRIMARY KEY,
+    idfactura INT NOT NULL,
+	idproducto int not null,
+    cantidad int NOT NULL,
+    fechaCreacion DATETIME DEFAULT GETDATE(),
+	estado int not null
+);
+go
+
 --STORE PROCEDURE INSERCIÓN DATOS
 
 CREATE OR ALTER PROCEDURE Super.InsertarSucursal
@@ -360,7 +379,7 @@ GO
 
 -------stores procedures para update------
 
-CREATE OR ALTER PROCEDURE ModificarSucursal
+CREATE OR ALTER PROCEDURE super.ModificarSucursal
     @idSucursal INT,
     @sucursal VARCHAR(30),
     @ciudad VARCHAR(30),
@@ -393,7 +412,7 @@ go
 
 
 
-CREATE OR ALTER PROCEDURE ModificarMedioPago
+CREATE OR ALTER PROCEDURE venta.ModificarMedioPago
     @idMedioPago INT,
     @descripcion VARCHAR(50)
 AS
@@ -415,7 +434,7 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE ModificarEmpleado
+CREATE OR ALTER PROCEDURE super.ModificarEmpleado
     @idEmpleado INT,
     @email VARCHAR(50),
     @cargo VARCHAR(15),
@@ -443,7 +462,7 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE ModificarProducto
+CREATE OR ALTER PROCEDURE producto.ModificarProducto
     @idProducto INT,
     @categoria INT,
     @nombre VARCHAR(255),
@@ -471,7 +490,8 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE ModificarFactura
+
+CREATE OR ALTER PROCEDURE NotaCredito.ModificarFactura
     @id INT,
     @fecha DATE,
     @hora TIME,
@@ -501,7 +521,8 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE ModificarTipoCliente
+
+CREATE OR ALTER PROCEDURE super.ModificarTipoCliente
     @idTipoCliente INT,
     @descripcion VARCHAR(50),
     @genero VARCHAR(20)
@@ -525,7 +546,7 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE ModificarCategoria
+CREATE OR ALTER PROCEDURE producto.ModificarCategoria
     @idCategoria INT,
     @nombre VARCHAR(30)
 AS
@@ -547,7 +568,8 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE ModificarVentaDetalle
+
+CREATE OR ALTER PROCEDURE NotaCredito.ModificarVentaDetalle
     @idVenta INT,
     @producto INT,
     @cantidad INT
@@ -591,7 +613,7 @@ go
 
 -----------------------------------Stores procedures para eliminar----------------
 
-CREATE OR ALTER PROCEDURE EliminarSucursal
+CREATE OR ALTER PROCEDURE super.EliminarSucursal
     @idSucursal INT
 AS
 BEGIN
@@ -611,7 +633,7 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE EliminarMedioPago
+CREATE OR ALTER PROCEDURE venta.EliminarMedioPago
     @idMedioPago INT
 AS
 BEGIN
@@ -632,7 +654,7 @@ END;
 go
 
 
-CREATE OR ALTER PROCEDURE EliminarEmpleado
+CREATE OR ALTER PROCEDURE super.EliminarEmpleado
     @idEmpleado INT
 AS
 BEGIN
@@ -655,7 +677,7 @@ END;
 GO
 
 
-CREATE OR ALTER PROCEDURE EliminarProducto
+CREATE OR ALTER PROCEDURE producto.EliminarProducto
     @idProducto INT
 AS
 BEGIN
@@ -675,7 +697,8 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE EliminarFactura
+
+CREATE OR ALTER PROCEDURE NotaCredito.EliminarFactura
     @id INT
 AS
 BEGIN
@@ -695,7 +718,7 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE EliminarVentaDetalle
+CREATE OR ALTER PROCEDURE NotaCredito.EliminarVentaDetalle
     @idVenta INT
 AS
 BEGIN
@@ -715,7 +738,8 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE EliminarTipoCliente
+
+CREATE OR ALTER PROCEDURE super.EliminarTipoCliente
     @idTipoCliente INT
 AS
 BEGIN
@@ -735,7 +759,7 @@ BEGIN
 END;
 go
 
-CREATE OR ALTER PROCEDURE EliminarCategoria
+CREATE OR ALTER PROCEDURE producto.EliminarCategoria
     @idCategoria INT
 AS
 BEGIN
@@ -755,13 +779,13 @@ BEGIN
 END;
 go
 ----------------------------
-
+/*
 create or alter procedure venta.cancelarVenta
 as
 begin
 throw 50000,'Error',1;
 end
-
+*/
 -----pesificar los productos----
 
 create or alter procedure producto.pesificarProducto

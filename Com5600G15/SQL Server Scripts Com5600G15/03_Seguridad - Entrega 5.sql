@@ -18,12 +18,12 @@ END;
 CREATE LOGIN supervisor WITH PASSWORD = 'Supervisor123!';
 GO
 
-IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'usuarioBasico')
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'cajero')
 BEGIN
-    DROP LOGIN usuarioBasico;
+    DROP LOGIN cajero;
 END;
 
-CREATE LOGIN usuarioBasico WITH PASSWORD = 'Usuario123!';
+CREATE LOGIN cajero WITH PASSWORD = 'Cajero123!';
 GO
 
 -------------------------------------------------------------------------------------------------------------------
@@ -41,29 +41,17 @@ CREATE USER supervisor FOR LOGIN supervisor;
 GO
 
 -- Crear usuario 'usuarioBasico'
-IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'usuarioBasico')
+IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'cajero')
 BEGIN
-    DROP USER usuarioBasico;
+    DROP USER cajero;
 END;
 
-CREATE USER usuarioBasico FOR LOGIN usuarioBasico;
+CREATE USER cajero FOR LOGIN cajero;
 GO
 
 
 
 ---------------------------------------------------------------------------------------------
-
-
-IF OBJECT_ID(N'Venta.NotaCredito', N'U') IS NOT NULL
-BEGIN
-    DROP TABLE Venta.NotaCredito;
-END;
-CREATE TABLE Venta.NotaCredito (
-    idNotaCredito INT IDENTITY(1,1) PRIMARY KEY,
-    idVentaDetalle INT NOT NULL REFERENCES Venta.VentaDetalle(idVenta),
-    valorCredito DECIMAL(10, 2) NOT NULL,
-    fechaCreacion DATETIME DEFAULT GETDATE()
-);
 
 
 
@@ -94,72 +82,93 @@ CREATE ROLE usuario;
 GO
 
 
--- Asignar permisos al rol Administrador
-GRANT INSERT, UPDATE, SELECT ON Venta.NotaCredito TO Administrador;
-go
-GRANT SELECT ON Venta.Factura TO Administrador;
-go
-GRANT SELECT ON super.Empleado TO Administrador;
-go
--- Asignar permisos al rol usuario
-GRANT SELECT ON Venta.Factura TO usuario;
-go
 
-
-
-
-CREATE OR ALTER PROCEDURE GenerarNotaCredito
-    @idVentaDetalle INT,
-    @valorCredito DECIMAL(10, 2)
+CREATE OR ALTER PROCEDURE NotaCredito.GenerarNotaCredito
+    @idFactura INT,
+    @idProducto Int,
+	@cantidad int
 AS
 BEGIN
     -- Verificar que la factura esté pagada
-    IF NOT EXISTS (
+    IF EXISTS (
         SELECT 1
-        FROM Venta.VentaDetalle
-        WHERE id = @idVentaDetalle
+        FROM NotaCredito.NotaCredito
     )
-    BEGIN
-        PRINT 'Error: La factura no está pagada.';
+	begin
+	    RAISERROR('Error el cliente ya hizo el reclamo.', 16, 1);
         RETURN;
-    END;
+	end
+		if not exists(
+					select 1
+					from Venta.VentaDetalle
+					where idfactura=@idFactura and producto=@idProducto
+		)
+	begin
+	    RAISERROR('Error No existe idFactura o producto', 16, 1);
+        RETURN;
+	end
 
 
-    -- Insertar la nota de crédito
-    INSERT INTO Venta.NotaCredito (idVentaDetalle, valorCredito)
-    VALUES (@idVentaDetalle, @valorCredito);
-
-
-
+		INSERT INTO NotaCredito.NotaCredito (idfactura, idproducto,cantidad,fechaCreacion,estado)
+		VALUES (@idFactura, @idProducto,@cantidad,GETDATE() ,1);
 END;
 go
-GRANT EXECUTE ON OBJECT::dbo.GenerarNotaCredito TO Administrador;
+
+create or alter NotaCredito.eliminarNotaCredito
+@idNota int
+as
+begin
+	    IF EXISTS (
+        SELECT 1
+        FROM NotaCredito.NotaCredito
+        WHERE idNotaCredito = @idNota
+    )
+    BEGIN
+			update NotaCredito.NotaCredito
+			SET estado = 0
+		    WHERE idNotaCredito = @idNota;
+    END
+    ELSE
+    BEGIN
+        RAISERROR('Error: No existe Nota Credito', 16, 1);
+END
+
+-- Asignar permisos al rol Administrador-usuario
+
+
+grant select on schema::producto to usuario,Administrador;
+grant execute on schema::producto to usuario,Administrador;
+
+grant select on schema::venta to usuario,Administrador;
+grant execute on schema::venta to usuario,Administrador;
+
+grant select on schema::NotaCredito to usuario,Administrador;
+grant execute on schema::NotaCredito to Administrador;
+
+grant select on schema::super to Administrador;
+grant execute on schema::Super to Administrador;
 go
+
 
 ALTER ROLE Administrador ADD MEMBER supervisor;
 go
-ALTER ROLE usuario ADD MEMBER usuarioBasico;
+ALTER ROLE usuario ADD MEMBER cajero;
 go
 
 --------------------------------------------Encriptar datos empleados
 
 
 
-DECLARE @FraseClave NVARCHAR(128);
-SET @FraseClave = 'ClaveSeguraParaEmpleados';
 
+create or alter procedure super.encriptarEmpleados
+@FraseClave varchar(50)
+as
+begin
 UPDATE Super.Empleado
 SET dni = EncryptByPassPhrase(@FraseClave, dni, 1, CONVERT(VARBINARY, idEmpleado)),
     cuil = EncryptByPassPhrase(@FraseClave, cuil, 1, CONVERT(VARBINARY, idEmpleado)),
     email= EncryptByPassPhrase(@FraseClave, email, 1, CONVERT(VARBINARY, idEmpleado));
-GO
-
-select * from Super.Empleado
+end
 
 
-------------------------------------Back UP
 
-BACKUP DATABASE [Com5600G15] 
-TO  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\Backup\Com5600G15.bak'
-WITH NOFORMAT, NOINIT,  NAME = N'Com5600G15-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10
-GO
