@@ -114,24 +114,30 @@ BEGIN
 END;
 go
 
-create or alter NotaCredito.eliminarNotaCredito
-@idNota int
-as
-begin
-	    IF EXISTS (
+CREATE OR ALTER PROCEDURE NotaCredito.eliminarNotaCredito
+    @idNota INT
+AS
+BEGIN
+    -- Verificar si la nota de crédito existe
+    IF EXISTS (
         SELECT 1
         FROM NotaCredito.NotaCredito
         WHERE idNotaCredito = @idNota
     )
     BEGIN
-			update NotaCredito.NotaCredito
-			SET estado = 0
-		    WHERE idNotaCredito = @idNota;
+        -- Actualizar el estado de la nota de crédito a 0
+        UPDATE NotaCredito.NotaCredito
+        SET estado = 0
+        WHERE idNotaCredito = @idNota;
     END
     ELSE
     BEGIN
-        RAISERROR('Error: No existe Nota Credito', 16, 1);
-END
+        -- Lanzar un error si no existe la nota de crédito
+        RAISERROR('Error: No existe Nota de Crédito.', 16, 1);
+    END
+END;
+GO
+
 
 -- Asignar permisos al rol Administrador-usuario
 
