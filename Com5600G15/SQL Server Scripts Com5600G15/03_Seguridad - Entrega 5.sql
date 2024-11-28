@@ -108,6 +108,17 @@ BEGIN
         RETURN;
 	end
 
+	 DECLARE @cantidadDisponible INT;
+
+    SELECT @cantidadDisponible = cantidad
+    FROM Venta.VentaDetalle
+    WHERE idfactura = @idFactura AND producto = @idProducto;
+
+    IF @cantidad > @cantidadDisponible
+    BEGIN
+        RAISERROR('Error La cantidad de producto que el cliente desea devolver es mayor a la que se llevo.', 16, 1);
+        RETURN;
+    END;
 
 		INSERT INTO NotaCredito.NotaCredito (idfactura, idproducto,cantidad,fechaCreacion,estado)
 		VALUES (@idFactura, @idProducto,@cantidad,GETDATE() ,1);
