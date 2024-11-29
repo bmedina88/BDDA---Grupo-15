@@ -98,7 +98,7 @@ BEGIN
     DROP TABLE Producto.Producto;
 END;
 CREATE TABLE Producto.Producto(
-	idProducto int primary key,
+	idProducto int IDENTITY(1,1) primary key,
 	categoria int REFERENCES Producto.Categoria(idCategoria),
 	nombre varchar(150),
 	precio DECIMAL(10, 2),

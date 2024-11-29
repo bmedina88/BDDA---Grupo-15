@@ -205,33 +205,18 @@ EXEC sp_MSforeachtable "ALTER TABLE ? CHECK CONSTRAINT ALL";
 
 
 --Importar todos los datos
-DECLARE @rutaIncompleta varchar(max);
-DECLARE @rutafinal varchar (max);
-DECLARE @rutaFinal2 varchar(max);
-SELECT @rutaIncompleta='C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15'
-SELECT @rutafinal2=@rutafinal;
+use Com5600G15;
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-EXEC Super.importarSucursal @rutafinal;
+EXEC Super.importarSucursal 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-EXEC Venta.ImportarMedioPago @rutafinal;
+EXEC Venta.ImportarMedioPago 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-EXEC Super.ImportarEmpleados @rutafinal;
+EXEC Super.ImportarEmpleados 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-EXEC Producto.ImportarCategorias @rutafinal;
+EXEC Producto.ImportarProductosElectronicos 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Electronic accessories.xlsx';
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Electronic accessories.xlsx'
-EXEC Producto.ImportarProductosElectronicos @rutafinal;
+EXEC Producto.ImportarProductosImportado 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\Productos_importados.xlsx';
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\Productos_importados.xlsx'
-EXEC Producto.ImportarProductosImportado @rutafinal;
+EXEC Producto.ImportarProductosCatalogo 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Productos\catalogo.csv', 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Informacion_complementaria.xlsx';
 
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Productos\catalogo.csv'
-SELECT @rutafinal2 = @rutaIncompleta + '\TP_integrador_Archivos\Informacion_complementaria.xlsx'
-EXEC Producto.ImportarProductosCatalogo @rutafinal, @rutafinal2;
-
-SELECT @rutafinal = @rutaIncompleta + '\TP_integrador_Archivos\Ventas_registradas.csv'
-EXEC Venta.ImportarVentas @rutafinal;
+EXEC Venta.ImportarVentas 'C:\Users\beybr\OneDrive\Escritorio\BDDA\BDDA---Grupo-15\TP_integrador_Archivos\Ventas_registradas.csv';

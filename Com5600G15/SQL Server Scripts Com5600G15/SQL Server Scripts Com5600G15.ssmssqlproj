@@ -40,29 +40,29 @@
           <AssociatedConnUserName />
           <FullPath>03_Seguridad - Entrega 5.sql</FullPath>
         </FileNode>
-        <FileNode Name="Reportes.sql">
+        <FileNode Name="04_Test_Entrega 3.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-2B1TVQD\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-2B1TVQD\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Reportes.sql</FullPath>
+          <FullPath>04_Test_Entrega 3.sql</FullPath>
         </FileNode>
-        <FileNode Name="Test_Entrega 3.sql">
+        <FileNode Name="05_Test_Entrega 4.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-2B1TVQD\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-2B1TVQD\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Test_Entrega 3.sql</FullPath>
+          <FullPath>05_Test_Entrega 4.sql</FullPath>
         </FileNode>
-        <FileNode Name="Test_Entrega 4.sql">
+        <FileNode Name="06_Test_Entrega 5.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-2B1TVQD\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-2B1TVQD\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Test_Entrega 4.sql</FullPath>
+          <FullPath>06_Test_Entrega 5.sql</FullPath>
         </FileNode>
-        <FileNode Name="Test_Entrega 5.sql">
+        <FileNode Name="07_Reportes.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:DESKTOP-2B1TVQD\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>DESKTOP-2B1TVQD\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
-          <FullPath>Test_Entrega 5.sql</FullPath>
+          <FullPath>07_Reportes.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>

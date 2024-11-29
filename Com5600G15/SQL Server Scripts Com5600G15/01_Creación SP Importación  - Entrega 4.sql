@@ -39,11 +39,11 @@ BEGIN
 	DROP TABLE IF EXISTS #SucursalTemp;
 
 	CREATE TABLE #SucursalTemp(
-		ciudad nvarchar(max),
-		sucursal nvarchar(max),
-		direccion nvarchar(max),
-		horario nvarchar(max),
-		telefono nvarchar(max))
+		ciudad varchar(max),
+		sucursal varchar(max),
+		direccion varchar(max),
+		horario varchar(max),
+		telefono varchar(max))
 
 
 	DECLARE @sql nvarchar(max);
@@ -84,7 +84,7 @@ AS
 BEGIN
 	DROP TABLE IF EXISTS #MedioPagoTemp;
 	CREATE TABLE #MedioPagoTemp(
-		descripcion nvarchar(max))
+		descripcion varchar(max))
 	
 
 	DECLARE @sql nvarchar(max);
@@ -126,17 +126,17 @@ AS
 BEGIN
 	DROP TABLE IF EXISTS #EmpleadoTemp;
 	CREATE TABLE #EmpleadoTemp(
-		legajo nvarchar(max),
-		nombre nvarchar(max),
-		apellido nvarchar(max),
-		dni nvarchar(max),
-		direccion nvarchar(max),
-		emailPersonal nvarchar(max),
-		emailEmpresa nvarchar(max),
-		cuil nvarchar(max),
-		cargo nvarchar(max),
-		sucursal nvarchar(max),
-		turno nvarchar(max))
+		legajo varchar(max),
+		nombre varchar(max),
+		apellido varchar(max),
+		dni varchar(max),
+		direccion varchar(max),
+		emailPersonal varchar(max),
+		emailEmpresa varchar(max),
+		cuil varchar(max),
+		cargo varchar(max),
+		sucursal varchar(max),
+		turno varchar(max))
 
 
 	DECLARE @sql nvarchar(max);
@@ -183,8 +183,8 @@ AS
 BEGIN
 	DROP TABLE IF EXISTS #CategoriaTemp;
 	CREATE TABLE #CategoriaTemp(
-		categoria nvarchar(max),
-		producto nvarchar(max))
+		categoria varchar(max),
+		producto varchar(max))
 
 
 	DECLARE @sql nvarchar(max);
@@ -228,8 +228,8 @@ AS
 BEGIN
 	DROP TABLE IF EXISTS #ProductoElectronicoTemp;
 	CREATE TABLE #ProductoElectronicoTemp(
-		producto nvarchar(max),
-		precio nvarchar(max))
+		producto varchar(max),
+		precio varchar(max))
 
 	IF (NOT EXISTS (SELECT * FROM Producto.Categoria WHERE nombre='Electrónicos'))
 		INSERT INTO Producto.Categoria (nombre) VALUES ('Electrónicos')
@@ -276,12 +276,12 @@ AS
 BEGIN
 	DROP TABLE IF EXISTS #ProductoImportadoTemp;
 	CREATE TABLE #ProductoImportadoTemp(
-		id nvarchar(max),
-		nombre nvarchar(max),
-		proveedor nvarchar(max),
-		categoria nvarchar(max),
-		cantidadPorUnidad nvarchar(max),
-		precioPorUnidad nvarchar(max))
+		id varchar(max),
+		nombre varchar(max),
+		proveedor varchar(max),
+		categoria varchar(max),
+		cantidadPorUnidad varchar(max),
+		precioPorUnidad varchar(max))
 
 
 	DECLARE @sql nvarchar(max);
@@ -339,8 +339,8 @@ BEGIN
 	DROP TABLE IF EXISTS #CategoriaTemp;
 	--Precarga de Categorias y su detalle para su posterior busqueda
 	CREATE TABLE #CategoriaTemp(
-		categoria nvarchar(max),
-		producto nvarchar(max));
+		categoria varchar(max),
+		producto varchar(max));
 
 
 	DECLARE @sql nvarchar(max);
@@ -357,13 +357,13 @@ BEGIN
 	--Importación catalago
 	DROP TABLE IF EXISTS #CatalogoTemp;
 	CREATE TABLE #CatalogoTemp(
-		id nvarchar(max),
-		categoria nvarchar(max),
-		nombre nvarchar(max),
-		precio nvarchar(max),
-		precio_referencia nvarchar(max),
-		unidad_referencia nvarchar(max),
-		fecha nvarchar(max));
+		id varchar(max),
+		categoria varchar(max),
+		nombre varchar(max),
+		precio varchar(max),
+		precio_referencia varchar(max),
+		unidad_referencia varchar(max),
+		fecha varchar(max));
 
 	
 	DECLARE @sql2 nvarchar(max);
@@ -399,7 +399,7 @@ BEGIN
 	INSERT INTO Producto.Producto (categoria, nombre, precio,moneda)
 	SELECT idCategoria,nombre,precio,'ARS' as moneda
 	FROM CatalogoConFk AS CACFK
-	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.categoria=CACFK.idCategoria AND P.nombre=CACFK.nombre)
+	WHERE NOT EXISTS(SELECT * FROM Producto.Producto AS P WHERE P.categoria=CACFK.idCategoria AND P.nombre=CACFK.nombre AND P.precio=CACFK.precio)
 
 
 	--Informe errores/advertencias
@@ -422,19 +422,19 @@ AS
 BEGIN
 	DROP TABLE IF EXISTS #VentaTemp
 	CREATE TABLE #VentaTemp(
-	idFactura nvarchar(max),
-	tipoFactura nvarchar(max),
-	ciudadSucursal nvarchar(max),
-	tipoCliente nvarchar(max),
-	genero nvarchar(max),
-	producto nvarchar(max),
-	precioUnitario nvarchar(max),
-	cantidad nvarchar(max),
-	fecha nvarchar(max),
-	hora nvarchar(max),
-	medioPago nvarchar(max),
-	empleado nvarchar(max),
-	idPago nvarchar(max))
+	idFactura varchar(max),
+	tipoFactura varchar(max),
+	ciudadSucursal varchar(max),
+	tipoCliente varchar(max),
+	genero varchar(max),
+	producto varchar(max),
+	precioUnitario varchar(max),
+	cantidad varchar(max),
+	fecha varchar(max),
+	hora varchar(max),
+	medioPago varchar(max),
+	empleado varchar(max),
+	idPago varchar(max))
 
 	DECLARE @sql nvarchar(max);
 	SELECT @sql = '
@@ -512,8 +512,8 @@ DECLARE @cantidadImportadaFactura int;
 SELECT @cantidadImportadaFactura = @@ROWCOUNT;
 
 --Import VentaDetalle
-INSERT INTO Venta.VentaDetalle(cantidad, idfactura, producto)
-SELECT T.cantidad, (SELECT F.id FROM Venta.Factura AS F WHERE F.idfactura=T.idFactura),
+INSERT INTO Venta.VentaDetalle(cantidad, idfactura, precioUnitario, moneda, producto)
+SELECT T.cantidad, (SELECT F.id FROM Venta.Factura AS F WHERE F.idfactura=T.idFactura), T.precioUnitario, 'ARS',
 		(SELECT TOP(1) P.idProducto FROM Producto.Producto AS P WHERE P.nombre = T.producto AND P.precio = T.precioUnitario)
 FROM #VentaTemp AS T
 
