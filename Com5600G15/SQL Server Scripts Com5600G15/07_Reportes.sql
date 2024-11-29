@@ -11,16 +11,14 @@ USE Com5600G15;
 
 ------Reporte Mensual: Total facturado por días de la semana----------
 BEGIN
-
-DECLARE @Year INT = 2024; -- Cambiar según corresponda
-DECLARE @Month INT = 11;  -- Cambiar según corresponda
+DECLARE @Year INT = 2019; -- Cambiar según corresponda
+DECLARE @Month INT = 03;  -- Cambiar según corresponda
 
 SELECT 
     DATENAME(WEEKDAY, F.fecha) AS DiaSemana,
-    SUM(VD.cantidad * P.precio) AS TotalFacturado
+    SUM(VD.cantidad * VD.precioUnitario) AS TotalFacturado
 FROM Venta.Factura F
 JOIN Venta.VentaDetalle VD ON F.id = VD.idfactura
-JOIN Producto.Producto P ON VD.producto = P.idProducto
 WHERE YEAR(F.fecha) = @Year AND MONTH(F.fecha) = @Month
 GROUP BY DATENAME(WEEKDAY, F.fecha)
 ORDER BY 
@@ -33,37 +31,32 @@ ORDER BY
         WHEN 'Saturday' THEN 6
         WHEN 'Sunday' THEN 7
     END
+
 FOR XML AUTO, ROOT('ReporteMensual');
-
-
 END
 GO
 -----------Consulta Ajustada: Reporte Trimestral-------
 BEGIN
-
-DECLARE @StartDate DATE = '2024-01-01'; -- Cambiar al inicio del trimestre
-DECLARE @EndDate DATE = '2024-03-31';   -- Cambiar al final del trimestre
-
+DECLARE @StartDate DATE = '2019-03-01'; -- Cambiar al inicio del trimestre
+DECLARE @EndDate DATE = '2019-05-31';   -- Cambiar al final del trimestre
 SELECT 
     DATENAME(MONTH, F.fecha) AS Mes,
     E.turno AS Turno,
-    SUM(VD.cantidad * P.precio) AS TotalFacturado
+    SUM(VD.cantidad * VD.precioUnitario) AS TotalFacturado
 FROM Venta.Factura F
 JOIN Venta.VentaDetalle VD ON F.id = VD.idfactura
-JOIN Producto.Producto P ON VD.producto = P.idProducto
 JOIN Super.Empleado E ON F.empleado = E.idEmpleado
 WHERE F.fecha BETWEEN @StartDate AND @EndDate
 GROUP BY DATENAME(MONTH, F.fecha), E.turno
 ORDER BY Mes, Turno
-FOR XML AUTO, ROOT('ReporteTrimestral');
 
+FOR XML AUTO, ROOT('ReporteTrimestral');
 END
 GO
 ----------------Reporte por rango de fechas: Cantidad de productos vendidos ordenado de mayor a menor---------------
 BEGIN
-
-DECLARE @StartDate DATE = '2024-01-01'; 
-DECLARE @EndDate DATE = '2024-12-31';  
+DECLARE @StartDate DATE = '2019-03-01'; 
+DECLARE @EndDate DATE = '2019-05-31';  
 
 SELECT 
     P.nombre AS Producto,
@@ -81,8 +74,8 @@ GO
 --------------- Reporte por rango de fechas: Cantidad de productos vendidos por sucursal-----------------
 BEGIN
 
-DECLARE @StartDate DATE = '2024-01-01'; 
-DECLARE @EndDate DATE = '2024-12-31';  
+DECLARE @StartDate DATE = '2019-03-01'; 
+DECLARE @EndDate DATE = '2019-05-31';  
 
 SELECT 
     S.sucursal AS Sucursal,
@@ -103,8 +96,8 @@ END
 GO
 --------Mostrar los 5 productos menos vendidos en el mes.-------------------
 BEGIN
-DECLARE @Year INT = 2024; 
-DECLARE @Month INT = 11; 
+DECLARE @Year INT = 2019; 
+DECLARE @Month INT = 03; 
 
 SELECT TOP 5 
     P.nombre AS Producto,
@@ -121,8 +114,8 @@ END
 GO
 ------------Mostrar los 5 productos más vendidos en un mes, por semana---
 BEGIN
-DECLARE @Year INT = 2024; 
-DECLARE @Month INT = 11; 
+DECLARE @Year INT = 2019; 
+DECLARE @Month INT = 03; 
 
 WITH ProductoVentas AS (
     SELECT 
@@ -145,7 +138,7 @@ GO
 -----------Total acumulado de ventas para una fecha y sucursal particulares----------
 BEGIN
 
-DECLARE @Fecha DATE = '2024-11-10'; 
+DECLARE @Fecha DATE = '2019-03-10'; 
 DECLARE @SucursalID INT = 1;        
 
 SELECT 
@@ -159,8 +152,17 @@ JOIN Venta.VentaDetalle VD ON F.id = VD.idfactura
 JOIN Producto.Producto P ON VD.producto = P.idProducto
 JOIN Super.Empleado E ON F.empleado = E.idEmpleado
 JOIN Super.Sucursal S ON E.sucursal = S.idSucursal
-WHERE F.fecha = @Fecha AND S.idSucursal = @SucursalID
+WHERE S.idSucursal = @SucursalID AND F.fecha = @Fecha 
 FOR XML AUTO, ROOT('ReporteTotalAcumulado');
+
+
+SELECT SUM(VD.cantidad * P.precio) AS TotalVendido
+FROM Venta.Factura F
+JOIN Venta.VentaDetalle VD ON F.id = VD.idfactura
+JOIN Producto.Producto P ON VD.producto = P.idProducto
+JOIN Super.Empleado E ON F.empleado = E.idEmpleado
+JOIN Super.Sucursal S ON E.sucursal = S.idSucursal
+WHERE S.idSucursal = @SucursalID AND F.fecha = @Fecha 
 
 END
 GO
