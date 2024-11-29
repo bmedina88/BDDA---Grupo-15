@@ -93,6 +93,7 @@ BEGIN
     IF EXISTS (
         SELECT 1
         FROM NotaCredito.NotaCredito
+		where estado=0
     )
 	begin
 	    RAISERROR('Error el cliente ya hizo el reclamo.', 16, 1);

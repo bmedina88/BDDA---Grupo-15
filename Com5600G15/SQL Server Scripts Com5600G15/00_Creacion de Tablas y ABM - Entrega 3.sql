@@ -44,8 +44,8 @@ CREATE TABLE Super.Sucursal(
 	idSucursal int IDENTITY(1,1) PRIMARY KEY,
 	sucursal varchar(30),
 	ciudad varchar(30),
-	direccion varchar(50),
-	horario varchar(20),
+	direccion varchar(100),
+	horario varchar(80),
 	telefono varchar(20)
 );
 go
@@ -145,8 +145,8 @@ BEGIN
 END;
 CREATE TABLE NotaCredito.NotaCredito (
     idNotaCredito INT IDENTITY(1,1) PRIMARY KEY,
-    idfactura INT NOT NULL,
-	idproducto int not null,
+    idfactura INT references Venta.Factura(id),
+	idproducto int references Producto.Producto(idProducto),
     cantidad int NOT NULL,
     fechaCreacion DATETIME DEFAULT GETDATE(),
 	estado int not null
@@ -304,6 +304,7 @@ BEGIN
     BEGIN
         update Producto.Producto
 		set categoria = @categoria,
+		nombre=@nombre,
 		precio = @precio,
 		moneda = @moneda
 		WHERE idProducto = @idProducto OR nombre = @nombre

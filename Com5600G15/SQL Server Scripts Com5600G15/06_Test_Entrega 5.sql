@@ -21,6 +21,7 @@ SELECT CURRENT_USER AS 'Login Actual';
 
 select * from Venta.Factura
 select * from Producto.Producto
+select * from Venta.VentaDetalle
 
 EXEC NotaCredito.GenerarNotaCredito
     @idFactura = 1,       
@@ -30,12 +31,12 @@ EXEC NotaCredito.GenerarNotaCredito
 select * from NotaCredito.NotaCredito
 
 exec NotaCredito.eliminarNotaCredito
-
+@idNota=1
 
 select * from Super.Empleado
 exec super.encriptarEmpleados 'ClaveSeguraParaEmpleados'
 select * from Super.Empleado
-
+
 ----------------------PERMISOS----------------------------------
 SELECT 
     perms.state_desc AS State,           
@@ -59,6 +60,7 @@ SELECT CURRENT_USER AS 'Login Actual';
 
 select * from Venta.Factura
 select * from Producto.Producto
+select * from Venta.VentaDetalle
 
 EXEC NotaCredito.GenerarNotaCredito
     @idFactura = 1,       
@@ -68,7 +70,7 @@ EXEC NotaCredito.GenerarNotaCredito
 select * from NotaCredito.NotaCredito
 
 exec NotaCredito.eliminarNotaCredito
-
+@idNota=1
 
 select * from Super.Empleado
 exec super.encriptarEmpleados 'ClaveSeguraParaEmpleados'
