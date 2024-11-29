@@ -780,13 +780,7 @@ BEGIN
 END;
 go
 ----------------------------
-/*
-create or alter procedure venta.cancelarVenta
-as
-begin
-throw 50000,'Error',1;
-end
-*/
+
 -----pesificar los productos----
 
 create or alter procedure producto.pesificarProducto

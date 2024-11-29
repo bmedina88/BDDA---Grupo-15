@@ -31,7 +31,7 @@ EXEC NotaCredito.GenerarNotaCredito
 select * from NotaCredito.NotaCredito
 
 exec NotaCredito.eliminarNotaCredito
-@idNota=1
+@idNota=3
 
 select * from Super.Empleado
 exec super.encriptarEmpleados 'ClaveSeguraParaEmpleados'

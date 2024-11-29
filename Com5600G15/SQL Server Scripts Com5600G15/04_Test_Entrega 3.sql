@@ -203,7 +203,7 @@ begin try
 	declare @error INT;
 
 	exec @error = Venta.InsertarFactura 
-    @idFactura = 'F-0002',
+    @idFactura = 'F-0003',
     @fecha = '2024-11-10',
     @hora = '14:30:00',
     @idPago = 'P-12345',
@@ -221,7 +221,7 @@ begin try
 
 	SELECT @idFactura = id 
 	FROM Venta.Factura 
-	WHERE idfactura = 'F-0002';
+	WHERE idfactura = 'F-0003';
 
 	EXEC Venta.InsertarVentaDetalle 
 		@producto = 1, 
@@ -245,6 +245,7 @@ begin try
 */
 
 ------ Si el comprador se arrepiente de la compra ---
+--throw 50000 , 'ERROR' ,1;
 
 	commit transaction
 	print 'Venta realizado con exito';

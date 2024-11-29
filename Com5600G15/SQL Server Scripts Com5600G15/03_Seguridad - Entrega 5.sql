@@ -89,11 +89,11 @@ CREATE OR ALTER PROCEDURE NotaCredito.GenerarNotaCredito
 	@cantidad int
 AS
 BEGIN
-    -- Verificar que la factura esté pagada
+    
     IF EXISTS (
         SELECT 1
         FROM NotaCredito.NotaCredito
-		where estado=0
+		where idfactura=@idFactura and idproducto=@idProducto
     )
 	begin
 	    RAISERROR('Error el cliente ya hizo el reclamo.', 16, 1);
