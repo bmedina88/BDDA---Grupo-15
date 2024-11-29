@@ -160,7 +160,6 @@ EXEC producto.ModificarCategoria
 ----Insertar Producto----
 
 EXEC Producto.InsertarProducto 
-    @idProducto = 1,
     @categoria = 1, 
     @nombre = 'Aspiradora',
     @precio = 200000.00,
@@ -171,10 +170,9 @@ select * from Producto.Producto
 ----si el producto existe actualizar
 
 EXEC Producto.InsertarProducto 
-    @idProducto = 1,
     @categoria = 1, 
-    @nombre = 'Pc Gamer i7',
-    @precio = 1000.00,
+    @nombre = 'Aspiradora',
+    @precio = 100.00,
 	@moneda = 'USD';
 
 ----Modificar Producto-----

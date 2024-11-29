@@ -283,7 +283,6 @@ GO
 
 
 CREATE OR ALTER PROCEDURE Producto.InsertarProducto
-    @idProducto INT,
     @categoria INT,
     @nombre NVARCHAR(255),
     @precio DECIMAL(10, 2),
@@ -294,11 +293,11 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM Producto.Producto
-        WHERE idProducto = @idProducto OR nombre = @nombre
+        WHERE nombre = @nombre
     )
     BEGIN
-        INSERT INTO Producto.Producto (idProducto, categoria, nombre, precio,moneda)
-        VALUES (@idProducto, @categoria, @nombre, @precio,@moneda);
+        INSERT INTO Producto.Producto (categoria, nombre, precio,moneda)
+        VALUES (@categoria, @nombre, @precio,@moneda);
     END
     ELSE
     BEGIN
@@ -307,7 +306,7 @@ BEGIN
 		nombre=@nombre,
 		precio = @precio,
 		moneda = @moneda
-		WHERE idProducto = @idProducto OR nombre = @nombre
+		WHERE nombre = @nombre
     END
 END;
 GO
