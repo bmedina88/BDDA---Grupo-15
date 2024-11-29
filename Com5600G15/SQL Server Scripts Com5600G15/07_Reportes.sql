@@ -1,3 +1,5 @@
+--ENTREGA: Creación de Reportes
+--FECHA DE ENTREGA: 29/11/2024
 --Materia: Base de datos Aplicadas
 --COMISIÓN: 02-5600
 --GRUPO: 15
@@ -5,14 +7,16 @@
 --				Medina, Braian Daniel			DNI: 44354115
 --				Di Rocco, Sebastian Martin		DNI: 41292371
 
---Reportes
 
 USE Com5600G15;
+GO
 
 ------Reporte Mensual: Total facturado por días de la semana----------
+CREATE OR ALTER PROCEDURE Reportes.TotalFacturadoPorDiaDeLaSemana(
+@Year INT,
+@Month INT)
+AS
 BEGIN
-DECLARE @Year INT = 2019; -- Cambiar según corresponda
-DECLARE @Month INT = 03;  -- Cambiar según corresponda
 
 SELECT 
     DATENAME(WEEKDAY, F.fecha) AS DiaSemana,
@@ -35,10 +39,13 @@ ORDER BY
 FOR XML AUTO, ROOT('ReporteMensual');
 END
 GO
------------Consulta Ajustada: Reporte Trimestral-------
+------Reporte Trimestral: Total facturado por turnos de trabajo por mes-------
+CREATE OR ALTER PROCEDURE Reportes.TotalFacturadoPorTurnoDeTrabajoPorMes(
+@StartDate DATE,
+@EndDate DATE)
+AS
 BEGIN
-DECLARE @StartDate DATE = '2019-03-01'; -- Cambiar al inicio del trimestre
-DECLARE @EndDate DATE = '2019-05-31';   -- Cambiar al final del trimestre
+
 SELECT 
     DATENAME(MONTH, F.fecha) AS Mes,
     E.turno AS Turno,
@@ -53,10 +60,12 @@ ORDER BY Mes, Turno
 FOR XML AUTO, ROOT('ReporteTrimestral');
 END
 GO
-----------------Reporte por rango de fechas: Cantidad de productos vendidos ordenado de mayor a menor---------------
+------Reporte por rango de fechas: Cantidad de productos vendidos en rango de fechas ordenado de mayor a menor---------------
+CREATE OR ALTER PROCEDURE Reportes.CantidadProductosVendidosEntreFechas(
+@StartDate DATE,
+@EndDate DATE)
+AS
 BEGIN
-DECLARE @StartDate DATE = '2019-03-01'; 
-DECLARE @EndDate DATE = '2019-05-31';  
 
 SELECT 
     P.nombre AS Producto,
@@ -69,13 +78,21 @@ GROUP BY P.nombre
 ORDER BY CantidadVendida DESC
 FOR XML AUTO, ROOT('ReporteProductosVendidos');
 
+SELECT 
+    SUM(VD.cantidad) AS TotalCantidadVendida
+FROM Venta.Factura F
+JOIN Venta.VentaDetalle VD ON F.id = VD.idfactura
+WHERE F.fecha BETWEEN @StartDate AND @EndDate
+
+
 END
 GO
---------------- Reporte por rango de fechas: Cantidad de productos vendidos por sucursal-----------------
+------Reporte por rango de fechas: Cantidad de productos vendidos en rango de fechas POR SUCURSAL ordenado de mayor a menor---------------
+CREATE OR ALTER PROCEDURE Reportes.CantidadProductosVendidosEntreFechasPorSucursal(
+@StartDate DATE,
+@EndDate DATE)
+AS
 BEGIN
-
-DECLARE @StartDate DATE = '2019-03-01'; 
-DECLARE @EndDate DATE = '2019-05-31';  
 
 SELECT 
     S.sucursal AS Sucursal,
@@ -91,13 +108,25 @@ GROUP BY S.sucursal, P.nombre
 ORDER BY S.sucursal, CantidadVendida DESC
 FOR XML AUTO, ROOT('ReporteProductosPorSucursal');
 
+SELECT 
+     s.sucursal, SUM(VD.cantidad) AS TotalCantidadVendida
+FROM Venta.Factura F
+JOIN Venta.VentaDetalle VD ON F.id = VD.idfactura
+JOIN Super.Empleado E ON F.empleado = E.idEmpleado
+JOIN Super.Sucursal S ON E.sucursal = S.idSucursal
+WHERE F.fecha BETWEEN @StartDate AND @EndDate
+GROUP BY S.sucursal, s.sucursal
+ORDER BY TotalCantidadVendida DESC
+
 
 END
 GO
---------Mostrar los 5 productos menos vendidos en el mes.-------------------
+------TOP 5: 5 productos menos vendidos en el mes---------------
+CREATE OR ALTER PROCEDURE Reportes.ProductosMasVendidosEnMes(
+@Year INT,
+@Month INT)
+AS
 BEGIN
-DECLARE @Year INT = 2019; 
-DECLARE @Month INT = 03; 
 
 SELECT TOP 5 
     P.nombre AS Producto,
@@ -112,13 +141,15 @@ FOR XML AUTO, ROOT('ReporteTop5MenosVendidos');
 
 END
 GO
-------------Mostrar los 5 productos más vendidos en un mes, por semana---
+------TOP 5: 5 productos más vendidos en un mes, por semana---------------
+CREATE OR ALTER PROCEDURE Reportes.ProductosMasVendidosEnMesPorSemana(
+@Year INT,
+@Month INT)
+AS
 BEGIN
-DECLARE @Year INT = 2019; 
-DECLARE @Month INT = 03; 
 
 WITH ProductoVentas AS (
-    SELECT 
+    SELECT
         P.nombre AS Producto,
         DATEPART(WEEK, F.fecha) AS Semana,
         SUM(VD.cantidad) AS CantidadVendida
@@ -135,11 +166,12 @@ FOR XML AUTO, ROOT('ReporteTop5MasVendidos');
 
 END
 GO
------------Total acumulado de ventas para una fecha y sucursal particulares----------
-BEGIN
-
-DECLARE @Fecha DATE = '2019-03-10'; 
-DECLARE @SucursalID INT = 1;        
+------Total acumulado: Mostrar total acumulado de ventas (o sea tambien mostrar el detalle) para una fecha y sucursal particulares---------------
+CREATE OR ALTER PROCEDURE Reportes.TotalAcumuladoPorSucursalEnFecha(
+@Fecha DATE,
+@SucursalID INT)
+AS
+BEGIN    
 
 SELECT 
     F.fecha AS Fecha,

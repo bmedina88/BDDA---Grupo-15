@@ -32,6 +32,8 @@ CREATE SCHEMA Super;
 GO
 create schema NotaCredito;
 go
+create schema Reportes;
+go
 --Tablas
 
 -- Verificar si la tabla existe y eliminarla
