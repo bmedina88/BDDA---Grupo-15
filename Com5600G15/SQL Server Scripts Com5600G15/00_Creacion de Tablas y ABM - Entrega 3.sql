@@ -123,6 +123,11 @@ CREATE TABLE Venta.Factura(
 	);
 go
 
+CREATE NONCLUSTERED INDEX IX_Factura_IdFactura
+ON Venta.Factura (idfactura);
+GO
+
+
 IF OBJECT_ID(N'Venta.VentaDetalle', N'U') IS NOT NULL
 BEGIN
     DROP TABLE Venta.VentaDetalle;
